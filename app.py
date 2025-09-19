@@ -53,7 +53,6 @@ def login():
         senha = form_login.password.data
         login_unlock = db.search_login(user)
         if login_unlock:
-            print(login_unlock['senha'])
             if bcrypt.checkpw(senha.encode("utf-8"), login_unlock['senha'].encode("utf-8")):  
                 user_obj = User(login_unlock['id'], login_unlock['email'], login_unlock['nome'], login_unlock['senha'], login_unlock['nivel'], login_unlock['empresa'])
                 login_user(user_obj)
@@ -279,6 +278,7 @@ def senhas():
                            passwords = passwords)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
+@login_required
 def usuarios():
     users = db.show_users()
 
