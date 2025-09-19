@@ -24,14 +24,14 @@ def show_all_open_reports():
 def search_login(user):
     try:
         verification = supabase.table('usuarios').select('*').eq('email', user).execute()
-        if verification.data: return verification.data[0]
-        else: return False
+        return verification.data[0] if verification.data else False
     except Exception as e:
         flash(f'Erro ao acessar o banco de dados: {str(e)}', 'danger')
 
 def search_id_login(id):
-    search = supabase.table('usuarios').select('*').eq('id', id).execute()
-    return search.data[0]
+    # try:
+        search = supabase.table('usuarios').select('*').eq('id', id).execute()
+        return search.data[0]
 
 def show_record(id_report, local_name):
     # Busca todos os registros de um relatório, em um local específico
