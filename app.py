@@ -50,9 +50,11 @@ def login():
     form_login = Login()
     if form_login.validate_on_submit():
         user = form_login.username.data
+        senha = form_login.password.data
         login_unlock = db.search_login(user)
         if login_unlock:
-            if form_login.password.data == login_unlock['senha']:  
+            print(login_unlock['senha'])
+            if bcrypt.checkpw(senha.encode("utf-8"), login_unlock['senha'].encode("utf-8")):  
                 user_obj = User(login_unlock['id'], login_unlock['email'], login_unlock['nome'], login_unlock['senha'], login_unlock['nivel'], login_unlock['empresa'])
                 login_user(user_obj)
                 return redirect(url_for('home'))
@@ -277,7 +279,6 @@ def senhas():
                            passwords = passwords)
 
 @app.route('/usuarios', methods=['GET', 'POST'])
-@login_required
 def usuarios():
     users = db.show_users()
 
@@ -291,7 +292,9 @@ def usuarios():
         email = form_add_user.email_add_user.data
         nivel = form_add_user.level_add_user.data
         empresa = form_add_user.company_add_user.data
-        db.add_user(nome, email, nivel, empresa)
+        senha = 'Aevo@123'
+        senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
+        db.add_user(nome, email, senha, nivel, empresa)
         return redirect(url_for('usuarios'))
     
     elif form_edit_user.validate_on_submit() and form_edit_user.submit_edit_user.data:

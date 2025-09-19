@@ -199,11 +199,12 @@ def add_password(software, usuario, senha, descricao, observacao):
         flash(f'Erro ao inserir crendenciais no banco de dados: {str(e)}')
 
 # Adiciona usuário
-def add_user(nome, email, nivel, empresa):
+def add_user(nome, email, senha, nivel, empresa):
     try:
         supabase.table('usuarios').insert({
             'nome':nome,
             'email':email,
+            'senha':senha,
             'nivel':nivel,
             'empresa':empresa
         }).execute()
