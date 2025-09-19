@@ -49,9 +49,10 @@
             <div class="col col-9">
                 <div class="d-flex justify-content-between mb-3">
                     <h4>Funcionamento da Usina</h4>
-                    {% if status %}
-                        <button class="btn btn-light rounded-circle btn-sm p-1 btn-add" onclick="modalElipse(this)">
-                            <i data-lucide="plus"></i>
+                    <script>alert({{current_user.level}})</script>
+                    {% if status and current_user.level == 'monitor'%}
+                        <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="modalElipse(this)">
+                            <i class='bxr bx-plus'></i> 
                         </button>
                     {% endif %}
 

@@ -25,6 +25,7 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     user_data = db.search_id_login(int(user_id))
+    print(user_data['nivel'])
     if user_data:
         return User(user_data['id'], user_data['email'], user_data['nome'], user_data['senha'], user_data['nivel'], user_data['empresa'])
     return None
@@ -32,6 +33,7 @@ def load_user(user_id):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    print(current_user['nivel'])
     open_reports = db.show_all_open_reports()
     closed_reports = db.show_closed_reports(10 - len(open_reports))
     reports = open_reports + closed_reports
