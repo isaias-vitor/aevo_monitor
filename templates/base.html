@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %} Monitoramento Aevo {% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Concert+One&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Oswald:wght@200..700&family=PT+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
+
+</head>
+<body class="bg-light">
+    
+    <div class="container-fluid">
+        <div class="row justify-content-between">
+            <div class="navbar fixed-top vh-100 justify-content-center bg-light border-end" style="width: 45px;">
+                <div class="d-flex flex-column justify-content-between align-items-center" style="height: 100%;">
+                    <div id="menu-superior" class="m-0 p-0">
+                        <div id="menu_logo" class="d-flex justify-content-center mb-5" style="width: 32px;">
+                            <img src="https://aevosolar.com.br/wp-content/uploads/2024/11/cropped-logo_aevo_energia.png" class="img-fluid">
+                        </div>
+                        <div id="menu-icons">
+                            <div class="d-flex justify-content-center mt-1">
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('home')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Início" id="icon-home"><i class='bxr bx-home text-secondary'></i> </a>
+                            </div>
+                            <div class="d-flex justify-content-center mt-1">
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('relatorios')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Relatórios" id="icon-relatorios"><i class='bxr bx-table-rows-merge text-secondary'></i> </a>
+                            </div>
+                            <div class="d-flex justify-content-center mt-1">
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('empresas')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Empresas" id="icon-empresas"><i class='bxr bx-enterprise text-secondary'></i> </a>
+                            </div>
+                            <div class="d-flex justify-content-center mt-1">
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('senhas')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Banco de Credenciais" id="icon-senhas"><i class='bxr bx-key-alt text-secondary'></i> </a>
+                            </div>
+                            <div class="d-flex justify-content-center mt-1">
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Ocorrências - Indisponível" id="icon-senhas"><i class='bxr bx-alert-octagon'></i> </a>
+                            </div>
+                            {% if current_user.level == 'adm' %}
+                                <hr class="hr my-1">
+                                <div class="d-flex justify-content-center mt-1">
+                                    <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('usuarios')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Usuários" id="icon-config"><i class='bxr bx-user-id-card text-secondary'></i> </a>
+                                </div>
+                                <div class="d-flex justify-content-center mt-1">
+                                    <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Logs - Indisponível" id="icon-config"><i class='bxr  bx-timer text-secondary'></i> </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="logout_menu">
+                        <a class="navbar-brand m-0 col-12 text-center text-dark mt-1" href="{{url_for('logout')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Sair"><i class='bxr bxs-arrow-in-left-square-half text-secondary'></i> </a>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="container-fluid p-0 mb-5">
+                <div class="navbard fixed-top p-2 border-bottom mb-5 bg-light d-flex justify-content-end" style="margin-left: 45px;">
+                    <div class="text-end">
+                        <div style="width: 25px;">
+                            <img src="https://thumb.ac-illust.com/51/51e1c1fc6f50743937e62fca9b942694_t.jpeg" alt="" class="rounded-circle img-fluid">
+                        </div>
+                    </div>
+                </div>
+                
+               {% block content %} 
+               {% endblock %}
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+</body>
+</html>
+
+<script>
+    // Inicializa todos os tooltips da página
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+</script>

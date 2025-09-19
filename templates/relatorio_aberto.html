@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container mt-5 p-0">
+        <div id="titulo-pagina " class="my-5 d-flex justify-content-between align-items-center">
+            <h2 class="d-inline mt-5 col-8 m-0">Relatórios</h2>
+        </div>
+
+        <div id="selecao-ufv" class="container p-0 mb-5">
+            <div class="row justify-content-between">
+                <div class="
+                    {% if status == True %} col-5
+                    {% else %} col-6
+                    {% endif %}
+                ">
+                    <select id="empresas-select" class="form-select">
+                        <option value="Athon">Athon</option>
+                        <option value="Mirai">Mirai</option>
+                        <option value="Aevo">Aevo</option>
+                    </select>
+                </div>
+                <div class="
+                    {% if status == True %} col-5
+                    {% else %} col-6
+                    {% endif %}
+                ">
+                    <select id="ufv-select" class="form-select">
+                        <option value="Brasilia 100" selected>Brasilia 100</option>
+                        <option value="Brasilia 200">Brasilia 200</option>
+                        <option value="Bela Vista de Goias 100">Bela Vista de Goias 100</option>
+                        <option value="Morro Agudo 100">Morro Agudo 100</option>
+                        <option value="Santa Rita 100">Santa Rita 100</option>
+                        <option value="Tres Lagoas">Tres Lagoas 100</option>
+                    </select>
+                </div>
+                {% if status %}
+                    <div class="col-2">
+                        <form id="form-closeReport" method="post">
+                            {{form_close_report.hidden_tag()}}
+                            {{form_close_report.submit_close_report()}}
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="relatorios" class="container row p-0">
+            <div class="col col-9">
+                <div class="d-flex justify-content-between mb-3">
+                    <h4>Funcionamento da Usina</h4>
+                    {% if status %}
+                        <button class="btn btn-light rounded-circle btn-sm p-1 btn-add" onclick="modalElipse(this)">
+                            <i data-lucide="plus"></i>
+                        </button>
+                    {% endif %}
+
+                </div>
+                <div class="container bg-light-subtle border rounded-3 p-3">
+                    <table id="tabela-usina" class="table table-borderless table-sm m-0 rounded-3 p-5">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center">Horário</th>
+                                <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Observação</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                                <tr class="
+                                    {% if report.status == 'Ok': %} ok 
+                                    {% elif report.status == 'Sem conexão': %} sem-conexao
+                                    {% else: %} ocorrencia {% endif %}
+                                " id="{{report.id}}">
+                                    <td scope="row" class="text-center">{{report.horario}}</td>
+                                    <td class="text-center">{{report.status}}</td>
+                                    <td class="text-center">
+                                    {% if report.observacao != '' %} {{ report.observacao }}
+                                    {% else %} -
+                                    {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-link btn-edit rounded-circle btn-sm text-warning p-1" onclick="modalElipse(this)">
+                                            <i data-lucide="pencil"></i>
+                                        </button>
+                                        <button class="btn btn-link btn-delete rounded-circle btn-sm text-danger p-1" onclick="modalDeleteElipse(this)">
+                                            <i data-lucide="trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col col-3">
+                <div class="d-flex justify-content-between mb-3">
+                    <h4>Câmeras</h4>
+                </div>
+                <div class="cardUsina rounded-3 bg-white border p-2">
+                    <table id="tabela-cameras" class="table table-hover table-borderless text-center table-sm">
+                        <thead>
+                            <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="col-6">Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if status %}
+                                {% for cam in cams %}
+                                    <tr class="{{cam.status}}" data-id="{{cam.id}}" data-nome="{{cam.nome}}" data-status="{{cam.status}}" data-observacao="{{cam.observacao}}">
+                                        <td scope="row" class="text-center">{{cam.nome}}</td>
+                                        <td class="text-center">{{cam.status | capitalize}}</td>
+                                        <td class="text-center">{{cam.observacao}}</td>
+                                    </tr>
+                                {% endfor %}                                    
+                            {% else %}
+                                {% for company in cams_closed_report %}
+                                    {% for ufv, cams in company.items() %}
+                                        {% if ufv == ufv_aberto %}
+                                            {% for cam in cams %}
+                                                <tr class="{{cam.status}}" data-id="{{cam.id}}" data-nome="{{cam.nome}}" data-status="{{cam.status}}" data-observacao="{{cam.obs}}">
+                                                    <td scope="row" class="text-center">{{cam.nome}}</td>
+                                                    <td class="text-center">{{cam.status | capitalize}}</td>
+                                                    <td class="text-center">{{cam.obs}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% endif %} 
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="ocorrencias" class="container row mt-4 p-0">
+            <div class="col">
+                <div class="d-flex justify-content-between">
+                    <h4>Ocorrências</h4>
+                    {% if status %}
+                        <i data-lucide="plus"></i>
+                    {% endif %}
+                </div>
+                <div class="container bg-light-subtle border rounded-3 p-3">
+                    <table id="tabela-ocorrencia" class="table table-borderless table-sm m-0 rounded-3 p-5">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center">#</th>
+                                <th scope="col" class="text-center">Horário</th>
+                                <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Ações</th>
+                                <th scope="col" class="text-center">Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td scope="row" class="text-center"><strong>11</strong></td>
+                                <td class="text-center">00:00</td>
+                                <td class="text-center">Furto</td>
+                                <td class="">
+                                    Feito contato com o Wagner;
+                                    <br>
+                                    <br>
+                                    Diversas tentativas de contato com Shok Segurança foram feitas, sem sucesso. Houve a tentativa de contato em um número antigo, encontrado na internet, mas também sem sucesso;
+                                    <br>
+                                    - Ligações diretas: caixa postal;
+                                    <br>
+                                    - Ligações Whatsapp: chamam até cair;
+                                    <br>
+                                    - Mensagens Whatsapp: recebidas mas não visualizadas/respondidas;
+                                    <br>
+                                    <br>
+                                    Feito contato com a Polícia Militar (Sargento Rosana). Informaram que não conseguiriam fornecer informações, uma vez que o ocorrido foi em um outro estado;
+                                </td>
+                                <td>
+                                    Notei alguma atividade suspeita durante a noite, com movimentação de pessoas sem prévia comunicação. Houve diversas tentativas de contato com a empresa responsável pela segurança do local, por ligações diretas e Whatsapp (chamadas e mensagens), em vão.
+
+                                    <br>
+                                    <br>
+
+    Por volta das 01:23, a polícia chegou ao local, e conversou com quem estava presente. Novas tentativas de contato com a empresa responsável foram feitas, sem sucesso. Foi feito o contato com a Polícia Militar, que informou que não seria possível auxiliar uma vez que usina se encontra em outro estado.
+
+    <br>
+                                    <br>
+
+    Durante o tempo que ficou na usina, notou-se que a Políca fez algumas rondas no local, indicando uma possível invasão.
+
+    <br>
+                                    <br>
+
+    Aproximadamente as 01:54 a pessoa que recebeu os policiais deixou a usina.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+  
+    <div class="modal fade" id="modal-relatorio-elipse" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalElipse" class="modal-title fs-5">Novo Registro - Elipse</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-addUFV" method="post">
+
+                    {{ form_elipse.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Horário</label>
+                                {{ form_elipse.time() }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Status</label>
+                                {{ form_elipse.status() }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                {{ form_elipse.observation() }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_elipse.submit_create_report() }}
+                    </div>
+                </form>
+
+                <form id="form-editUFV" hidden method="post">
+
+                    {{ form_edit_record.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Horário</label>
+                                {{ form_edit_record.timeEditElipse() }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Status</label>
+                                {{ form_edit_record.statusEditElipse() }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                {{ form_edit_record.observationEditElipse() }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_edit_record.id_recordEditElipse(class="visually-hidden") }}
+                        {{ form_edit_record.submit_edit_record() }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-delete-elipse" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalElipseDelete" class="modal-title fs-5">Excluir Registro</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-deleteRecord" method="post">
+                    {{ form_delete_record.hidden_tag() }}
+                    <div class="modal-body text-center">
+                        Tem certeza que deseja excluir este registro? Após a confirmação, não será possivel recupera-lo.
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_delete_record.id_recordDeleteElipse(class="visually-hidden") }}
+                        {{ form_delete_record.submit_delete_record() }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-camera" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalCamera" class="modal-title fs-5"></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-editCamera" method="post">
+                {{ form_edit_cam_record.hidden_tag() }}
+                {{ form_edit_cam_record.id_cam_edit_record(hidden=True) }}
+                    <div class="modal-body">
+                                        
+                        <label class="form-label mt-3">Status</label>
+                        {{ form_edit_cam_record.status_edit_cam_record(class='form-select') }}
+            
+                        <label class="form-label mt-3">Observação</label>
+                        {{ form_edit_cam_record.obs_edit_cam_record(class='form-control') }}
+            
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_edit_cam_record.submit_edit_cam_record(class='btn btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+      
+    <script>
+        document.getElementById('icon-relatorios').classList.add('bg-body-secondary')
+    </script>  
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+
+    <script>
+        function inserirHora() {
+          const agora = new Date();
+          const horas = String(agora.getHours()).padStart(2, '0');
+          const minutos = String(agora.getMinutes()).padStart(2, '0');
+    
+          const horario = `${horas}:${minutos}`;
+          document.getElementById("time").value = horario;
+        }
+    </script>
+
+    <script>        
+        const optionsEmpresas = {{ empresas | tojson }};
+
+        const empresa = `{{empresa}}`
+        
+        const empresaSelect = document.getElementById('empresas-select');
+        const usinaSelect = document.getElementById('ufv-select');
+        
+        empresaSelect.value = empresa;
+        usinaSelect.innerHTML = '';
+        let contadorPrimiero = 0;
+        optionsEmpresas[empresa].forEach(ufv => {
+            const option = document.createElement('option');
+            if(contadorPrimiero == 0){
+                contadorPrimiero++;
+                option.selected = true;
+            }
+            option.value = ufv;
+            option.text = ufv;
+            usinaSelect.appendChild(option);
+        });
+
+        empresaSelect.addEventListener('change', function(){
+            const urlBase = "{{ url_for('relatorio', id_relatorio = id_relatorio, empresa = '_EMPRESA_', ufv = '_UFV_') }}"
+            const url = urlBase.replace('_EMPRESA_', empresaSelect.value).replace('_UFV_', optionsEmpresas[empresaSelect.value][0])
+            window.location.href = url
+        })
+
+        usinaSelect.addEventListener('change', function(){
+            const urlBase = "{{ url_for('relatorio', id_relatorio = id_relatorio, empresa = '_EMPRESA_', ufv = '_UFV_') }}"
+            const url = urlBase.replace('_EMPRESA_', empresaSelect.value).replace('_UFV_', usinaSelect.value)
+            window.location.href = url
+        })
+
+    </script>
+
+    <script>
+        function modalElipse(botao) {
+
+            if(botao.classList.contains('btn-edit')){
+                document.getElementById('tituloModalElipse').innerText = 'Editar Registro - Elipse'
+                document.getElementById('form-addUFV').hidden = true;
+                document.getElementById('form-editUFV').hidden = false;
+                let linha = botao.closest('tr')
+                let dados = linha.querySelectorAll('td');
+                let valores = Array.from(dados).slice(0, -1).map(td => td.innerText);
+                
+                document.getElementById('id_recordEditElipse').value = linha.id;
+                document.getElementById('timeEditElipse').value = valores[0]
+                document.getElementById('statusEditElipse').value = valores[1]
+                if(valores[2] != '-' ) {
+                    document.getElementById('observationEditElipse').value = valores[2]
+                }else{
+                    document.getElementById('observationEditElipse').value = ''
+                }
+            }else{
+                document.getElementById('form-editUFV').hidden = true;
+                document.getElementById('form-addUFV').hidden = false;
+                inserirHora();
+            }
+            
+            let modal = new bootstrap.Modal(document.getElementById('modal-relatorio-elipse'));
+            modal.show();
+        }
+
+        function modalDeleteElipse(botao){
+            if(botao.classList.contains('btn-delete')){
+                let linha = botao.closest('tr')
+                document.getElementById('id_recordDeleteElipse').value = linha.id;
+            }
+
+            let modal = new bootstrap.Modal(document.getElementById('modal-delete-elipse'));
+            modal.show();
+        }
+    </script>
+
+    {% if status %}
+        <script>
+            document.querySelectorAll("#tabela-cameras tbody tr").forEach(tr => {
+                tr.addEventListener("click", () => {
+                    const nome = tr.dataset.nome;
+                    const status = tr.dataset.status;
+                    const obs = tr.dataset.observacao;
+
+                    document.getElementById('id_cam_edit_record').value = tr.dataset.id;
+
+                    document.getElementById("titulo-modalCamera").innerText = nome;
+                    document.getElementById("status_edit_cam_record").value = status;
+                    document.getElementById('obs_edit_cam_record').value = obs;
+
+                    const modal = new bootstrap.Modal(document.getElementById("modal-camera"));
+                    modal.show();
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5 p-0">
+    <div id="titulo-pagina " class="my-5 d-flex justify-content-between align-items-center">
+      <h2 class="d-inline mt-5 col-8 m-0">{{ufv}}</h2>
+    </div>
+
+    <div id="inforUsina" class="row justify-content-between">
+      <div class="container m-0 col-6" id="cameras">
+        <div class="d-flex justify-content-between">
+          <h4>Câmeras</h4>
+            <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="new_cam()">
+              <i class='bxr bxs-plus text-secondary'  style="font-size:1.2rem;"></i> 
+            </button>
+        </div>
+        <div class="cardUsina rounded-3 bg-white border border-secondary-subtle p-2">
+          <table id="tabela-cameras" class="table table-hover table-borderless text-center table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="col-6">Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cam in cams %}
+                <tr class="{{cam.status}}" data-id="{{cam.id}}" data-nome="{{cam.nome}}" data-tipo="{{cam.tipo}}" data-status="{{cam.status}}" data-observacao="{{cam.observacao}}">
+                  <td scope="row" class="text-center">{{cam.nome}}</td>
+                  <td class="text-center">{{cam.tipo}}</td>
+                  <td class="text-center">{{cam.status | capitalize}}</td>
+                  <td class="text-center">{{cam.observacao}}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="container m-0 col-6" id="contatos-endereco">
+        <div class="d-flex justify-content-between">
+          <h4>Localização</h4>
+          <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="editLocal()">
+            <i class='bxr bxs-edit-alt text-secondary'  style="font-size:1.2rem;"></i> 
+          </button>
+        </div>
+        <div class="cardUsina rounded-3 bg-white border border-secondary-subtle p-2">
+          <div class="d-flex">
+            <div class="me-1">
+              <strong>Endereço: </strong> 
+            </div>
+            <div id="endereco">
+              {% if local.endereco %}
+                {{local.endereco}}
+              {% endif %}  
+            </div>
+          </div>
+          <div class="d-flex mt-2">
+            <p><strong>Geolocalização: </strong><a
+              {% if local.geolocalizacao %}
+                href="{{local.geolocalizacao}}" target="_blank"
+              {% else %} 
+                href=""
+              {% endif %}
+              id="maps">Google Maps</a> </p> 
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mt-5">
+          <h4>Contatos</h4>
+          <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="newContact()">
+            <i class='bxr bxs-plus text-secondary'  style="font-size:1.2rem;"></i> 
+          </button>
+        </div>
+        <div class="cardUsina rounded-3 bg-white border border-secondary-subtle p-2">
+          <table id="tabela-contatos" class="table table-hover table-borderless table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Empresa</th>
+                <th scope="col">Telefone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for contact in contacts %}
+                <tr data-id="{{contact.id}}" data-nome="{{contact.nome}}" data-empresa="{{contact.empresa}}" data-telefone="{{contact.telefone}}">
+                  <td>{{contact.nome}}</td>
+                  <td>{{contact.empresa}}</td>
+                  <td>{{contact.telefone}}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-camera" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="titulo-modalCamera" class="modal-title fs-5">Nova Câmera</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="form-addCamera" method="post">
+          {{ form_add_cam.hidden_tag() }}
+          <div class="modal-body">
+                  
+            <label class="form-label">Nome</label>
+            {{ form_add_cam.name(class='form-control') }}
+
+            <label class="form-label mt-3">Tipo</label>
+            {{ form_add_cam.tipo(class='form-select') }}
+        
+            <label class="form-label mt-3">Status</label>
+            {{ form_add_cam.status(class='form-select') }}
+
+            <label class="form-label mt-3">Observação</label>
+            {{ form_add_cam.obs(class='form-control') }}
+
+          </div>
+
+          <div class="modal-footer">
+            {{ form_add_cam.submit(class='btn btn-primary') }}
+          </div>
+        </form>
+        <form id="form-editCamera" method="post">
+          {{ form_edit_cam.hidden_tag() }}
+
+          {{ form_edit_cam.id_cam_edit(hidden=True) }}
+          <div class="modal-body">
+                  
+            <label class="form-label">Nome</label>
+            {{ form_edit_cam.name_edit_cam(class='form-control') }}
+
+            <label class="form-label mt-3">Tipo</label>
+            {{ form_edit_cam.tipo_edit_cam(class='form-select') }}
+        
+            <label class="form-label mt-3">Status</label>
+            {{ form_edit_cam.status_edit_cam(class='form-select') }}
+
+            <label class="form-label mt-3">Observação</label>
+            {{ form_edit_cam.obs_edit_cam(class='form-control') }}
+
+          </div>
+        
+          <div class="modal-footer">
+            {{ form_edit_cam.submit_edit_cam(class='btn btn-primary') }}
+            <button type="button" data-bs-target="#modal-deleteCamera" data-bs-toggle="modal" class="btn btn-danger" name="btn-deleteCam" id="btn-deleteCam">Excluir</button>
+          </div>
+        </form>
+          
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-deleteCamera" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="titulo-modalCamera" class="modal-title fs-5">Exluir Câmera?</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="form-deleteCamera" method="post">
+          {{ form_delete_cam.hidden_tag() }}
+          {{ form_delete_cam.id_cam_delete(hidden = True) }}
+          <div class="modal-body">
+            <p class="text-center">
+              Você deseja realmente excluir esta câmera?
+            </p>
+          </div>
+          <div class="modal-footer">
+            {{ form_delete_cam.submit_delete_cam(class='btn btn-danger') }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-editLocalizacao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="titulo-modalLOcalizacao" class="modal-title fs-5">Editar Localização</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="form-editLocalizacao" method="post">
+          {{ form_edit_local.hidden_tag() }}
+          <div class="modal-body">
+            <label class="form-label">Endereço</label>
+            {{ form_edit_local.endereco_edit_local(class='form-control') }}
+            <label class="form-label mt-4">Link Geolocalização</label>
+            {{ form_edit_local.maps_edit_local(class='form-control') }}
+          </div>
+          <div class="modal-footer">
+            {{ form_edit_local.submit_edit_local(class='btn btn-primary') }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-contato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="titulo-modalContact" class="modal-title fs-5">Novo Contato</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="form-addContact" method="post">
+          {{ form_add_contact.hidden_tag() }}
+          <div class="modal-body">
+                  
+            <label class="form-label">Nome</label>
+            {{ form_add_contact.name_add_contact(class='form-control') }}
+
+            <label class="form-label mt-3">Empresa</label>
+            {{ form_add_contact.company_add_contact(class='form-control') }}
+        
+            <label class="form-label mt-3">Telefene</label>
+            {{ form_add_contact.phone_add_contact(class='form-control') }}
+
+          </div>
+
+          <div class="modal-footer">
+            {{ form_add_contact.submit_add_contact(class='btn btn-primary') }}
+          </div>
+        </form>
+        <form id="form-editContact" method="post">
+          {{ form_edit_contact.hidden_tag() }}
+          {{ form_edit_contact.id_edit_contact(hidden=True) }}
+          <div class="modal-body">
+                  
+            <label class="form-label">Nome</label>
+            {{ form_edit_contact.name_edit_contact(class='form-control') }}
+
+            <label class="form-label mt-3">Empresa</label>
+            {{ form_edit_contact.company_edit_contact(class='form-control') }}
+        
+            <label class="form-label mt-3">Telefone</label>
+            {{ form_edit_contact.phone_edit_contact(class='form-control') }}
+
+
+          </div>
+        
+          <div class="modal-footer">
+            {{ form_edit_contact.submit_edit_contact(class='btn btn-primary') }}
+            <button type="button" data-bs-target="#modal-deleteContato" data-bs-toggle="modal" class="btn btn-danger" name="btn-deleteContact" id="btn-deleteContact">Excluir</button>
+          </div>
+        </form>
+          
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-deleteContato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 id="titulo-modalCamera" class="modal-title fs-5">Exluir Contato?</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form id="form-deleteCamera" method="post">
+          {{ form_delete_contact.hidden_tag() }}
+          {{ form_delete_contact.id_contact_delete(hidden = True) }}
+          <div class="modal-body">
+            <p class="text-center">
+              Você deseja realmente excluir este contato?
+            </p>
+          </div>
+          <div class="modal-footer">
+            {{ form_delete_contact.submit_delete_contact(class='btn btn-danger') }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('icon-empresas').classList.add('bg-body-secondary')
+  </script>
+
+  <script>
+
+    document.querySelectorAll("#tabela-cameras tbody tr").forEach(tr => {
+      tr.addEventListener("click", () => {
+        const nome = tr.dataset.nome;
+        const tipo = tr.dataset.tipo;
+        const status = tr.dataset.status;
+        const obs = tr.dataset.observacao;
+
+        document.getElementById('form-editCamera').hidden = false
+        document.getElementById('form-addCamera').hidden = true
+        document.getElementById('titulo-modalCamera').innerText = 'Editar Câmera'
+
+        document.getElementById('id_cam_edit').value = tr.dataset.id;
+        document.getElementById('id_cam_delete').value = tr.dataset.id;
+
+        document.getElementById("name_edit_cam").value = nome;
+        document.getElementById("tipo_edit_cam").value = tipo;
+        document.getElementById("status_edit_cam").value = status;
+        document.getElementById('obs_edit_cam').value = obs;
+
+        const modal = new bootstrap.Modal(document.getElementById("modal-camera"));
+        modal.show();
+      });
+    });
+
+    function new_cam(){
+      document.getElementById('form-editCamera').hidden = true
+      document.getElementById('form-addCamera').hidden = false
+      document.getElementById('titulo-modalCamera').innerText = 'Nova Câmera'
+
+      document.getElementById("name_edit_cam").value = '';
+      document.getElementById("tipo_edit_cam").value = 'Bullet';
+      document.getElementById("status_edit_cam").value = 'Online';
+      document.getElementById('obs_edit_cam').value = '';
+
+      const modal = new bootstrap.Modal(document.getElementById("modal-camera"));
+      modal.show();
+    }
+  </script>
+
+  <script>
+    function editLocal(){
+      const modal = new bootstrap.Modal(document.getElementById("modal-editLocalizacao"));
+      modal.show();
+      document.getElementById('endereco_edit_local').value = document.getElementById('endereco').innerText
+      document.getElementById('maps_edit_local').value = document.getElementById('maps').getAttribute('href')
+    }
+  </script>
+
+  <script>
+    document.querySelectorAll("#tabela-contatos tbody tr").forEach(tr => {
+      tr.addEventListener("click", () => {
+        const nome = tr.dataset.nome;
+        const empresa = tr.dataset.empresa;
+        const telefone = tr.dataset.telefone;
+
+        document.getElementById('form-editContact').hidden = false
+        document.getElementById('form-addContact').hidden = true
+        document.getElementById('titulo-modalContact').innerText = 'Editar Contato'
+
+        document.getElementById('id_edit_contact').value = tr.dataset.id;
+        document.getElementById('id_contact_delete').value = tr.dataset.id;
+
+        document.getElementById("name_edit_contact").value = nome;
+        document.getElementById("company_edit_contact").value = empresa;
+        document.getElementById("phone_edit_contact").value = telefone;
+
+        const modal = new bootstrap.Modal(document.getElementById("modal-contato"));
+        modal.show();
+      });
+    });
+
+    function newContact(){
+      document.getElementById('form-editContact').hidden = true
+      document.getElementById('form-addContact').hidden = false
+      document.getElementById('titulo-modalContact').innerText = 'Novo Contato'
+
+      document.getElementById("name_edit_contact").value = '';
+      document.getElementById("company_edit_contact").value = '';
+      document.getElementById("phone_edit_contact").value = '';
+
+      const modal = new bootstrap.Modal(document.getElementById("modal-contato"));
+      modal.show();
+    }
+  </script>
+  
+{% endblock%}

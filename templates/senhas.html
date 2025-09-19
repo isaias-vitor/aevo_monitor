@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container mt-5 p-0">
+        <div id="top" class="my-5 d-flex justify-content-between align-items-center">
+            <h2 class="d-inline col-8 m-0 mt-5">Banco de Credenciais</strong></h2>
+              
+            <button class="btn btn-outline-secondary btn-szm mt-5 mb-3" onclick="newPassword()">Adicionar</button>
+        </div>
+
+        <div class="container bg-light-subtle border rounded-3 p-3">
+            <table id="tabela-credenciais" class="table table-borderless table-hover m-0 rounded-3 p-5">
+                <thead>
+                        <tr>
+                            <th scope="col" class="text-center">Software</th>
+                            <th scope="col" class="text-center">Usuário</th>
+                            <th scope="col" class="text-center">Senha</th>
+                            <th scope="col" class="text-center">Descrição</th>
+                            <th scope="col" class="text-center">Observações</th>
+                        </tr>
+                </thead>
+                <tbody>
+                    {% for password in passwords %}
+                        <tr class="text-center cursor-pointer" data-id="{{password.id}}" data-software="{{password.software}}" data-usuario="{{password.usuario}}" data-senha="{{password.senha}}" data-descricao="{{password.descricao}}" data-observacao="{{password.observacao}}">
+                            <td>{{password.software}}</td>
+                            <td>{{password.usuario}}</td>
+                            <td>{{password.senha}}</td>
+                            <td>{{password.descricao}}</td>
+                            <td>{{password.observacao}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    <div class="modal fade" id="modal-credencial" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalPassword" class="modal-title fs-5">Nova Credencial</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+        
+                <form id="form-addPassword" method="post">
+                {{ form_add_password.hidden_tag() }}
+                    <div class="modal-body">
+                            
+                        <label class="form-label">Software</label>
+                        {{ form_add_password.software_add_password(class='form-control') }}
+            
+                        <label class="form-label mt-3">Usuário</label>
+                        {{ form_add_password.user_add_password(class='form-control') }}
+                    
+                        <label class="form-label mt-3">Senha</label>
+                        {{ form_add_password.password_add_password(class='form-control') }}
+
+                        <label class="form-label mt-3">Descrição</label>
+                        {{ form_add_password.description_add_password(class='form-control') }}
+
+                        <label class="form-label mt-3">Observações</label>
+                        {{ form_add_password.obs_add_password(class='form-control') }}
+            
+                    </div>
+            
+                    <div class="modal-footer">
+                        {{ form_add_password.submit_add_password(class='btn btn-primary') }}
+                    </div>
+                </form>
+                <form id="form-editPassword" method="post">
+                {{ form_edit_password.hidden_tag() }}
+                {{ form_edit_password.id_edit_password(hidden=True) }}
+                    <div class="modal-body">
+                            
+                        <label class="form-label">Software</label>
+                        {{ form_edit_password.software_edit_password(class='form-control') }}
+            
+                        <label class="form-label mt-3">Usuário</label>
+                        {{ form_edit_password.user_edit_password(class='form-control') }}
+                    
+                        <label class="form-label mt-3">Senha</label>
+                        {{ form_edit_password.password_edit_password(class='form-control') }}
+
+                        <label class="form-label mt-3">Descrição</label>
+                        {{ form_edit_password.description_edit_password(class='form-control') }}
+
+                        <label class="form-label mt-3">Observações</label>
+                        {{ form_edit_password.obs_edit_password(class='form-control') }}
+
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_edit_password.submit_edit_password(class='btn btn-primary') }}
+                        <button type="button" data-bs-target="#modal-deleteCredential" data-bs-toggle="modal" class="btn btn-danger" name="btn-deleteContact" id="btn-deleteContact">Excluir</button>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-deleteCredential" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalCamera" class="modal-title fs-5">Excluir Credencial?</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+        
+                <form id="form-deleteCamera" method="post">
+                {{ form_delete_credential.hidden_tag() }}
+                {{ form_delete_credential.id_credential_delete(hidden = True) }}
+                    <div class="modal-body">
+                        <p class="text-center">
+                        Você deseja realmente excluir esta credencial?
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        {{ form_delete_credential.submit_delete_credential(class='btn btn-danger') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+      </div>
+
+    <script>
+        document.querySelectorAll("#tabela-credenciais tbody tr").forEach(tr => {
+            tr.addEventListener("click", () => {
+                const software = tr.dataset.software;
+                const usuario = tr.dataset.usuario;
+                const senha = tr.dataset.senha;
+                const descricao = tr.dataset.descricao;
+                const observacao = tr.dataset.observacao;
+        
+                document.getElementById('form-editPassword').hidden = false
+                document.getElementById('form-addPassword').hidden = true
+                document.getElementById('titulo-modalPassword').innerText = 'Editar Credencial'
+        
+                document.getElementById('id_edit_password').value = tr.dataset.id;
+                document.getElementById('id_credential_delete').value = tr.dataset.id;
+        
+                document.getElementById("software_edit_password").value = software;
+                document.getElementById("user_edit_password").value = usuario;
+                document.getElementById("password_edit_password").value = senha;
+                document.getElementById("description_edit_password").value = descricao;
+                document.getElementById("obs_edit_password").value = observacao;
+        
+                const modal = new bootstrap.Modal(document.getElementById("modal-credencial"));
+                modal.show();
+          });
+        });
+    
+        function newPassword(){
+            document.getElementById('form-editPassword').hidden = true
+            document.getElementById('form-addPassword').hidden = false
+            document.getElementById('titulo-modalPassword').innerText = 'Nova Credencial'
+        
+            document.getElementById("software_edit_password").value = '';
+            document.getElementById("user_edit_password").value = '';
+            document.getElementById("password_edit_password").value = '';
+            document.getElementById("description_edit_password").value = '';
+            document.getElementById("obs_edit_password").value = '';
+        
+            const modal = new bootstrap.Modal(document.getElementById("modal-credencial"));
+            modal.show();
+        }
+      </script>
+
+    <script>
+        document.getElementById('icon-senhas').classList.add('bg-body-secondary')
+    </script>
+      
+{% endblock %}

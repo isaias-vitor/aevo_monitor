@@ -1,0 +1,47 @@
+a{
+    text-decoration: none;
+}
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.card-usina:hover, .card-empresa:hover {
+    background: rgb(240, 239, 239) !important;
+}
+
+#tabela-usina .ok td, #tabela-cameras .online td{
+    color: rgb(88, 145, 88);
+}
+
+#tabela-usina .sem-conexao td{
+    color: rgb(255, 187, 0);
+}
+
+#tabela-usina .ocorrencia td, #tabela-cameras .offline td{
+    color: red;
+}
+
+#tabela-cameras tr, #tabela-contatos tr{
+    cursor: pointer;
+}
+
+
+#tabela-usina .icon{
+    font-size: 0rem !important;
+}
+
+/* Fazendo o scroll dos ralatorios da tela inicial desaparecer */
+/* Para Chrome, Edge, Safari */
+#cardsContainer::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Para Firefox */
+  #cardsContainer {
+    scrollbar-width: none; /* esconde a barra */
+  }
+  
+  /* Para IE e Edge Legacy */
+  #cardsContainer {
+    -ms-overflow-style: none;
+  }

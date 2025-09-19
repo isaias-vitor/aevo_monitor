@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container mt-5 p-0">
+        <div id="titulo-pagina " class="my-5 d-flex justify-content-between align-items-center">
+            <h2 class="d-inline mt-5 col-8 m-0">{{empresa}}</h2>
+            <button class="btn btn-outline-secondary btn-sm mt-4" data-bs-toggle="modal" data-bs-target="#modal-addUfv">Adicionar Usina</button>
+        </div>
+
+        <div class="mt-4 d-flex flex-wrap   ">
+            {% for ufv in ufvs %}
+                <div class="col-3 d-flex justify-content-center px-1 mt-1">
+                    <a href="{{url_for('usina', ufv = ufv.nome)}}" class="text-secondary d-flex justify-content between col-12">
+                        <div class="card-usina border mt-1 rounded-2 p-2 col-12 bg-body-tertiary">{{ufv.nome}}</div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-addUfv" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Adicionar nova UFV</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+    
+                <form id="form-editCamera" method="post">
+                    {{ form_add_ufv.hidden_tag() }}
+            
+                    <div class="modal-body">
+                        <label class="form-label">Nome</label>
+                        {{ form_add_ufv.name_add_ufv(class='form-control') }}
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_add_ufv.submit_add_ufv(class='btn btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('icon-empresas').classList.add('bg-body-secondary')
+    </script>
+
+{% endblock %}

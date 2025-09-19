@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container mt-5 p-0">
+        <div id="top" class="my-5 d-flex justify-content-between align-items-center">
+            <h2 class="d-inline col-8 m-0 mt-5">Gerenciamento de Usuários</strong></h2>
+            <button class="btn btn-outline-secondary btn-szm mt-5 mb-3" onclick="newUser()">Adicionar</button>
+        </div>
+
+        <div class="container bg-light-subtle border rounded-3 p-3">
+            <table id="tabela-usuarios" class="table table-borderless table-hover m-0 rounded-3 p-5">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center"></th>
+                        <th scope="col" class="text-center">Nome</th>
+                        <th scope="col" class="text-center">Email</th>
+                        <th scope="col" class="text-center">Senha</th>
+                        <th scope="col" class="text-center">Nível</th>
+                        <th scope="col" class="text-center">Empresa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr class="text-center cursor-pointer" data-id="{{user.id}}" data-nome="{{user.nome}}" data-email="{{user.email}}" data-senha="{{user.senha}}" data-nivel="{{user.nivel}}" data-empresa="{{user.empresa}}">
+                            <td class="d-flex justify-content-center">
+                                <div style="width: 25px;">
+                                    <img src="https://thumb.ac-illust.com/51/51e1c1fc6f50743937e62fca9b942694_t.jpeg" alt="" class="rounded-circle img-fluid">
+                                </div>
+                            </td>
+                            <td>{{user.nome}}</td>
+                            <td>{{user.email}}</td>
+                            <td>{{user.senha}}</td>
+                            <td>{{user.nivel | capitalize}}</td>
+                            <td>{{user.empresa}}</td>
+                        </tr>
+                    {% endfor %}    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-usuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalUser" class="modal-title fs-5">Novo Usuário</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+        
+                <form id="form-addUser" method="post">
+                {{ form_add_user.hidden_tag() }}
+                    <div class="modal-body">
+                            
+                        <label class="form-label">Nome</label>
+                        {{ form_add_user.name_add_user(class='form-control') }}
+            
+                        <label class="form-label mt-3">Email</label>
+                        {{ form_add_user.email_add_user(class='form-control') }}
+                    
+                        <label class="form-label mt-3">Senha</label>
+                        {{ form_add_user.password_add_user(class='form-control') }}
+
+                        <label class="form-label mt-3">Nível</label>
+                        {{ form_add_user.level_add_user(class='form-control') }}
+
+                        <label class="form-label mt-3">Empresa</label>
+                        {{ form_add_user.company_add_user(class='form-control') }}
+            
+                    </div>
+            
+                    <div class="modal-footer">
+                        {{ form_add_user.submit_add_user(class='btn btn-primary') }}
+                    </div>
+                </form>
+                <form id="form-editUser" method="post">
+                {{ form_edit_user.hidden_tag() }}
+                {{ form_edit_user.id_edit_user(hidden=True) }}
+                    <div class="modal-body">
+                                
+                        <label class="form-label">Nome</label>
+                        {{ form_edit_user.name_edit_user(class='form-control') }}
+            
+                        <label class="form-label mt-3">Email</label>
+                        {{ form_edit_user.email_edit_user(class='form-control') }}
+                    
+                        <label class="form-label mt-3">Senha</label>
+                        {{ form_edit_user.password_edit_user(class='form-control') }}
+
+                        <label class="form-label mt-3">Nível</label>
+                        {{ form_edit_user.level_edit_user(class='form-control') }}
+
+                        <label class="form-label mt-3">Empresa</label>
+                        {{ form_edit_user.company_edit_user(class='form-control') }}
+            
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_edit_user.submit_edit_user(class='btn btn-primary') }}
+                        <button type="button" data-bs-target="#modal-deleteUser" data-bs-toggle="modal" class="btn btn-danger" name="btn-deleteUser" id="btn-deleteUsert">Excluir</button>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-deleteUser" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalUser" class="modal-title fs-5">Excluir Usuário?</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+        
+                <form id="form-deleteCamera" method="post">
+                {{ form_delete_user.hidden_tag() }}
+                {{ form_delete_user.id_delete_user(hidden = True) }}
+                    <div class="modal-body">
+                        <p class="text-center">
+                        Você deseja realmente excluir este usuário?
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        {{ form_delete_user.submit_delete_user(class='btn btn-danger') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll("#tabela-usuarios tbody tr").forEach(tr => {
+            tr.addEventListener("click", () => {
+                const nome = tr.dataset.nome;
+                const email = tr.dataset.email;
+                const senha = tr.dataset.senha;
+                const nivel = tr.dataset.nivel;
+                const empresa = tr.dataset.empresa;
+        
+                document.getElementById('form-editUser').hidden = false
+                document.getElementById('form-addUser').hidden = true
+                document.getElementById('titulo-modalUser').innerText = 'Editar Usuário'
+        
+                document.getElementById('id_edit_user').value = tr.dataset.id;
+                document.getElementById('id_delete_user').value = tr.dataset.id;
+        
+                document.getElementById("name_edit_user").value = nome;
+                document.getElementById("email_edit_user").value = email;
+                document.getElementById("password_edit_user").value = senha;
+                document.getElementById("level_edit_user").value = nivel;
+                document.getElementById("company_edit_user").value = empresa;
+        
+                const modal = new bootstrap.Modal(document.getElementById("modal-usuario"));
+                modal.show();
+            });
+        });
+
+        function newUser(){
+            document.getElementById('form-editUser').hidden = true
+            document.getElementById('form-addUser').hidden = false
+            document.getElementById('titulo-modalUser').innerText = 'Novo Usuário'
+        
+            document.getElementById("name_edit_user").value = '';
+            document.getElementById("email_edit_user").value = '';
+            document.getElementById("password_edit_user").value = '';
+            document.getElementById("level_edit_user").value = '';
+            document.getElementById("company_edit_user").value = '';
+        
+            const modal = new bootstrap.Modal(document.getElementById("modal-usuario"));
+            modal.show();
+        }
+    </script>
+    
+{% endblock %}
