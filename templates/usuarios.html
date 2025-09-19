@@ -15,7 +15,6 @@
                         <th scope="col" class="text-center"></th>
                         <th scope="col" class="text-center">Nome</th>
                         <th scope="col" class="text-center">Email</th>
-                        <th scope="col" class="text-center">Senha</th>
                         <th scope="col" class="text-center">Nível</th>
                         <th scope="col" class="text-center">Empresa</th>
                     </tr>
@@ -30,7 +29,6 @@
                             </td>
                             <td>{{user.nome}}</td>
                             <td>{{user.email}}</td>
-                            <td>{{user.senha}}</td>
                             <td>{{user.nivel | capitalize}}</td>
                             <td>{{user.empresa}}</td>
                         </tr>
@@ -41,7 +39,7 @@
     </div>
 
     <div class="modal fade" id="modal-usuario" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 id="titulo-modalUser" class="modal-title fs-5">Novo Usuário</h1>
@@ -57,9 +55,6 @@
             
                         <label class="form-label mt-3">Email</label>
                         {{ form_add_user.email_add_user(class='form-control') }}
-                    
-                        <label class="form-label mt-3">Senha</label>
-                        {{ form_add_user.password_add_user(class='form-control') }}
 
                         <label class="form-label mt-3">Nível</label>
                         {{ form_add_user.level_add_user(class='form-control') }}
@@ -83,21 +78,25 @@
             
                         <label class="form-label mt-3">Email</label>
                         {{ form_edit_user.email_edit_user(class='form-control') }}
-                    
-                        <label class="form-label mt-3">Senha</label>
-                        {{ form_edit_user.password_edit_user(class='form-control') }}
 
                         <label class="form-label mt-3">Nível</label>
-                        {{ form_edit_user.level_edit_user(class='form-control') }}
+                        {{ form_edit_user.level_edit_user(class='form-select') }}
 
                         <label class="form-label mt-3">Empresa</label>
                         {{ form_edit_user.company_edit_user(class='form-control') }}
             
                     </div>
                     
-                    <div class="modal-footer">
-                        {{ form_edit_user.submit_edit_user(class='btn btn-primary') }}
-                        <button type="button" data-bs-target="#modal-deleteUser" data-bs-toggle="modal" class="btn btn-danger" name="btn-deleteUser" id="btn-deleteUsert">Excluir</button>
+                    <div class="d-flex">
+                        <div class="col-4 px-1 py-2">
+                            {{ form_edit_user.submit_edit_user(class='btn btn-primary col-12') }}
+                        </div>
+                        <div class="col-4 px-1 py-2">
+                            <button type="button" data-bs-target="#modal-deleteUser" data-bs-toggle="modal" class="btn btn-danger col-12" name="btn-deleteUser" id="btn-deleteUsert">Excluir</button>
+                        </div>
+                        <div class="col-4 px-1 py-2">
+                            <button type="button" data-bs-target="#modal-newPassword" data-bs-toggle="modal" class="btn btn-warning col-12" name="btn-newPassword" id="btn-newPassword">Nova Senha</button>
+                        </div>
                     </div>
                 </form>
                 
@@ -129,12 +128,33 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-newPassword" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalNewPassword" class="modal-title fs-5">Digite a nova senha do usuário</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+        
+                <form id="form-deleteCamera" method="post">
+                {{ form_new_password.hidden_tag() }}
+                {{ form_new_password.id_new_password(hidden = True) }}
+                    <div class="modal-body">
+                       {{form_new_password.new_password(class='form-control')}}
+                    </div>
+                    <div class="modal-footer">
+                        {{ form_new_password.submit_new_password(class='btn btn-info') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.querySelectorAll("#tabela-usuarios tbody tr").forEach(tr => {
             tr.addEventListener("click", () => {
                 const nome = tr.dataset.nome;
                 const email = tr.dataset.email;
-                const senha = tr.dataset.senha;
                 const nivel = tr.dataset.nivel;
                 const empresa = tr.dataset.empresa;
         
@@ -144,10 +164,10 @@
         
                 document.getElementById('id_edit_user').value = tr.dataset.id;
                 document.getElementById('id_delete_user').value = tr.dataset.id;
+                document.getElementById('id_new_password').value = tr.dataset.id;
         
                 document.getElementById("name_edit_user").value = nome;
                 document.getElementById("email_edit_user").value = email;
-                document.getElementById("password_edit_user").value = senha;
                 document.getElementById("level_edit_user").value = nivel;
                 document.getElementById("company_edit_user").value = empresa;
         

@@ -1,3 +1,4 @@
+import bcrypt
 from flask import *
 from forms import *
 from flask_wtf import CSRFProtect
@@ -9,7 +10,6 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
 csrf = CSRFProtect(app)
-bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -25,7 +25,6 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     user_data = db.search_id_login(int(user_id))
-    print(user_data['nivel'])
     if user_data:
         return User(user_data['id'], user_data['email'], user_data['nome'], user_data['senha'], user_data['nivel'], user_data['empresa'])
     return None
@@ -33,7 +32,6 @@ def load_user(user_id):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    print(current_user['nivel'])
     open_reports = db.show_all_open_reports()
     closed_reports = db.show_closed_reports(10 - len(open_reports))
     reports = open_reports + closed_reports
@@ -286,35 +284,42 @@ def usuarios():
     form_add_user = AddUser()
     form_edit_user = EditUser()
     form_delete_user = DeleteUser()
+    form_new_password = NewPassword()
 
     if form_add_user.validate_on_submit() and form_add_user.submit_add_user.data:
         nome = form_add_user.name_add_user.data
         email = form_add_user.email_add_user.data
-        senha = form_add_user.password_add_user.data
         nivel = form_add_user.level_add_user.data
         empresa = form_add_user.company_add_user.data
-        db.add_user(nome, email, senha, nivel, empresa)
+        db.add_user(nome, email, nivel, empresa)
         return redirect(url_for('usuarios'))
     
     elif form_edit_user.validate_on_submit() and form_edit_user.submit_edit_user.data:
         id_edit_usuario = form_edit_user.id_edit_user.data
         nome = form_edit_user.name_edit_user.data
         email = form_edit_user.email_edit_user.data
-        senha = form_edit_user.password_edit_user.data
         nivel = form_edit_user.level_edit_user.data
         empresa = form_edit_user.company_edit_user.data
-        db.edit_user(id_edit_usuario, nome, email, senha, nivel, empresa)
+        db.edit_user(id_edit_usuario, nome, email, nivel, empresa)
         return redirect(url_for('usuarios'))
 
     elif form_delete_user.validate_on_submit() and form_delete_user.submit_delete_user.data:
         id_delete_usuario = form_delete_user.id_delete_user.data
         db.delete_user(id_delete_usuario)
         return redirect(url_for('usuarios'))
+    
+    elif form_new_password.validate_on_submit() and form_new_password.submit_new_password.data:
+        id_user = form_new_password.id_new_password.data
+        new_password = form_new_password.new_password.data
+        new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        db.edit_new_password(id_user, new_password.decode('utf-8'))
+        return redirect(url_for('usuarios'))
 
     return render_template('usuarios.html', users = users,
                            form_add_user = form_add_user,
                            form_edit_user = form_edit_user,
-                           form_delete_user = form_delete_user
+                           form_delete_user = form_delete_user,
+                           form_new_password = form_new_password
                            )
 
 @app.route('/logout')

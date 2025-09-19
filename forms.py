@@ -143,7 +143,6 @@ class DeleteCrendential(FlaskForm):
 class AddUser(FlaskForm):
     name_add_user = StringField()
     email_add_user = StringField()
-    password_add_user = StringField()
     level_add_user = SelectField(choices=[
         ('monitor', 'Monitor'),
         ('gestor', 'Gestor'),
@@ -156,7 +155,6 @@ class EditUser(FlaskForm):
     id_edit_user = StringField()
     name_edit_user = StringField()
     email_edit_user = StringField()
-    password_edit_user = StringField()
     level_edit_user = SelectField(choices=[
         ('monitor', 'Monitor'),
         ('gestor', 'Gestor'),
@@ -168,3 +166,8 @@ class EditUser(FlaskForm):
 class DeleteUser(FlaskForm):
     id_delete_user = StringField()
     submit_delete_user = SubmitField('Excluir')
+
+class NewPassword(FlaskForm):
+    id_new_password = StringField()
+    new_password = StringField()
+    submit_new_password = SubmitField('Salvar')

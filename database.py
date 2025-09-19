@@ -199,12 +199,11 @@ def add_password(software, usuario, senha, descricao, observacao):
         flash(f'Erro ao inserir crendenciais no banco de dados: {str(e)}')
 
 # Adiciona usuário
-def add_user(nome, email, senha, nivel, empresa):
+def add_user(nome, email, nivel, empresa):
     try:
         supabase.table('usuarios').insert({
             'nome':nome,
             'email':email,
-            'senha': senha,
             'nivel':nivel,
             'empresa':empresa
         }).execute()
@@ -282,17 +281,24 @@ def edit_cam_report(id_cam, status, obs):
         flash(f'Erro ao editar câmera: {str(e)}')
 
 # Edita usuário
-def edit_user(id_user, nome, email, senha, nivel, empresa):
+def edit_user(id_user, nome, email, nivel, empresa):
     try:
         supabase.table('usuarios').update({
             'nome':nome,
             'email':email,
-            'senha': senha,
             'nivel':nivel,
             'empresa':empresa
         }).eq('id', id_user).execute()
     except Exception as e:
         flash(f'Erro ao editar usuário: {str(e)}')
+
+# Edita senha do usuário
+def edit_new_password(id_user, senha):
+    print(senha)
+    try:
+        supabase.table('usuarios').update({'senha': senha}).eq('id', id_user).execute()
+    except Exception as e:
+        print(f'Erro ao alterar senha: {str(e)}')
 
 
 
