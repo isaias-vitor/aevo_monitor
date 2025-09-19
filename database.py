@@ -13,8 +13,13 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def show_all_open_reports():
     # Procura por relatorios abertos
-    report = supabase.table('relatorios').select('*').eq('status', 'TRUE').order('id', desc=False).execute()
-    return report.data
+    try:
+        report = supabase.table('relatorios').select('*').eq('status', 'TRUE').order('id', desc=False).execute()
+        return report.data
+    except Exception as e:
+        error_message = f'Erro ao buscar relatórios abertos no banco de dados: {str(e)}'
+        flash(error_message)
+        print(error_message)
 
 def search_login(user):
     try:
