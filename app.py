@@ -32,10 +32,9 @@ def load_user(user_id):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    open_report = db.search_open_reports(current_user.id)
     open_reports = db.show_all_open_reports()
     closed_reports = db.show_closed_reports(10 - len(open_reports))
-    reports = open_report + closed_reports
+    reports = open_reports + closed_reports
     form = CreateReport()
     session['ufv_aberto'] = 'Brasilia 100'
 

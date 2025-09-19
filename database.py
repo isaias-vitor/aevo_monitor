@@ -11,11 +11,6 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def search_open_reports(user):
-    # Procura por relatorios abertos no nome do usuário
-    report = supabase.table('relatorios').select('*').eq('responsavel', user).eq('status', 'TRUE').execute()
-    return report.data
-
 def show_all_open_reports():
     # Procura por relatorios abertos
     report = supabase.table('relatorios').select('*').eq('status', 'TRUE').order('id', desc=False).execute()
