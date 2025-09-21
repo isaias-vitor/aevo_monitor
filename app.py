@@ -66,6 +66,7 @@ def login():
 def relatorio(id_relatorio, empresa, ufv):
     status = db.status_report(id_relatorio)['status']
     reports = db.show_record(str(id_relatorio), ufv)
+    id_responsible = int(db.id_responsible(id_relatorio)['responsavel'])
     cams = db.show_cams(ufv)
     cams_closed_report = db.show_cams_closed_report(id_relatorio)[0]['dados'] if not status else []
     reports.sort(key=lambda x: x["id"])
@@ -129,7 +130,8 @@ def relatorio(id_relatorio, empresa, ufv):
                            form_edit_cam_record = form_edit_cam_record,
                            status = status,
                            cams = cams,
-                           cams_closed_report = cams_closed_report) 
+                           cams_closed_report = cams_closed_report,
+                           id_responsible = id_responsible) 
 
 @app.route('/relatorios', methods=['GET', 'POST'])
 @login_required
@@ -280,7 +282,7 @@ def senhas():
 
 @app.route('/usuarios', methods=['GET', 'POST'])
 @login_required
-@role_required('admin')
+@role_required('adm')
 def usuarios():
     users = db.show_users()
 

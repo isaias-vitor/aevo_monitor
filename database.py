@@ -115,6 +115,10 @@ def show_users():
     users = supabase.table('usuarios').select('*').order('id', desc=False).execute()
     return users.data
 
+# Busca o id do responsável pelo relatório
+def id_responsible(id_report):
+    responsible = supabase.table('relatorios').select('responsavel').eq('id', id_report).execute()
+    return responsible.data[0]
 
 
 

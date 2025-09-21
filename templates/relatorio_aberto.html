@@ -10,7 +10,7 @@
         <div id="selecao-ufv" class="container p-0 mb-5">
             <div class="row justify-content-between">
                 <div class="
-                    {% if status == True %} col-5
+                    {% if status == True and id_responsible == current_user.id %} col-5
                     {% else %} col-6
                     {% endif %}
                 ">
@@ -21,7 +21,7 @@
                     </select>
                 </div>
                 <div class="
-                    {% if status == True %} col-5
+                    {% if status == True and id_responsible == current_user.id %} col-5
                     {% else %} col-6
                     {% endif %}
                 ">
@@ -36,10 +36,12 @@
                 </div>
                 {% if status %}
                     <div class="col-2">
-                        <form id="form-closeReport" method="post">
-                            {{form_close_report.hidden_tag()}}
-                            {{form_close_report.submit_close_report()}}
-                        </form>
+                        {% if id_responsible == current_user.id %}
+                            <form id="form-closeReport" method="post">
+                                {{form_close_report.hidden_tag()}}
+                                {{form_close_report.submit_close_report()}}
+                            </form>
+                        {% endif %} 
                     </div>
                 {% endif %}
             </div>
