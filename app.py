@@ -42,8 +42,6 @@ def home():
     for report in reports:
         report['responsavel'] = db.search_name_user(report['responsavel'])
 
-    print(reports)
-
     if form.validate_on_submit():
         db.create_report(current_user.id)
         flash('Login bem sucedido!', 'success')
@@ -143,6 +141,12 @@ def relatorio(id_relatorio, empresa, ufv):
 def relatorios():
     closed_reports = db.show_all_closed_reports()
     open_reports = db.show_all_open_reports()
+    reports = closed_reports + open_reports
+
+    for report in closed_reports:
+        report['responsavel'] = db.search_name_user(report['responsavel'])
+    for report in open_reports:
+        report['responsavel'] = db.search_name_user(report['responsavel'])
 
     return render_template('relatorios.html', closed_reports = closed_reports, open_reports = open_reports)
 
