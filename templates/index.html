@@ -7,8 +7,10 @@
     
     <div id="recepcao" class="my-5 d-flex justify-content-between align-items-center">
         <h2 class="d-inline col-8 m-0 mt-5">Bem vindo <strong>{{current_user.nome}}!</strong></h2>
-          
-        <button class="btn btn-outline-secondary btn-szm mt-5 mb-3" data-bs-toggle="modal" data-bs-target="#modal-relatorio">Novo Relatório</button>
+        
+        {% if current_user.level == 'monitor' %}
+          <button class="btn btn-outline-secondary btn-szm mt-5 mb-3" data-bs-toggle="modal" data-bs-target="#modal-relatorio">Novo Relatório</button>
+        {% endif %}
     </div>
   
     <div id="relatorios-abertos" class="container p-0 mb-5">
