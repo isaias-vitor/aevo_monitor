@@ -1,6 +1,7 @@
 import bcrypt
 from flask import *
 from forms import *
+from roles import *
 from flask_wtf import CSRFProtect
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
@@ -279,6 +280,7 @@ def senhas():
 
 @app.route('/usuarios', methods=['GET', 'POST'])
 @login_required
+@role_required('admin')
 def usuarios():
     users = db.show_users()
 
