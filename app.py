@@ -39,6 +39,11 @@ def home():
     form = CreateReport()
     session['ufv_aberto'] = 'Brasilia 100'
 
+    for report in reports:
+        report['responsavel'] = db.search_name_user(report['responsavel'])
+
+    print(reports)
+
     if form.validate_on_submit():
         db.create_report(current_user.id)
         flash('Login bem sucedido!', 'success')

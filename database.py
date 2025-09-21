@@ -25,6 +25,9 @@ def search_id_login(id):
     except:
         flash('Usuário não encontrado no banco de dados')
 
+def search_name_user(id_user):
+    names = supabase.table('usuarios').select('nome').eq('id', id_user).execute()
+    return names.data[0]['nome']
 
 
 
