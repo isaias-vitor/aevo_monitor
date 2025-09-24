@@ -57,7 +57,7 @@
                         {{ form_add_user.email_add_user(class='form-control') }}
 
                         <label class="form-label mt-3">Nível</label>
-                        {{ form_add_user.level_add_user(class='form-control') }}
+                        {{ form_add_user.level_add_user(class='form-select') }}
 
                         <label class="form-label mt-3">Empresa</label>
                         {{ form_add_user.company_add_user(class='form-control') }}
@@ -183,7 +183,6 @@
         
             document.getElementById("name_edit_user").value = '';
             document.getElementById("email_edit_user").value = '';
-            document.getElementById("password_edit_user").value = '';
             document.getElementById("level_edit_user").value = '';
             document.getElementById("company_edit_user").value = '';
         

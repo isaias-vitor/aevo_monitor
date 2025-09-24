@@ -1,0 +1,78 @@
+ {% extends 'base_gestor.html' %}
+
+ {% block content %}
+    <div class="container-fluid">
+        <div class="row justify-content-between" id="menu-top">            
+            <div class="container-fluid p-0 mb-5">
+                <div class="container p-0">
+                    <div id="saudacao" class="my-5 d-flex justify-content-between align-items-center">
+                        <h2 class="d-inline col-8 m-0 mt-5">Bem vindo <strong>{{current_user.nome}}!</strong></h2>
+                    </div>
+                    <div id="titulo-pagina " class="my-5 d-flex justify-content-between align-items-center">
+                        <h2 class="d-inline mt-5 col-8 m-0">Relatórios</h2>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-center">
+                        {% for report in open_reports %}
+                            <div class="card-relatAberto border mt-4 me-2 col-2 p-2 rounded-4 bg-white">
+                                <div class="text-center d-flex flex-column">
+                                    <div class="mb-1">
+                                        {% if report.turno == 'noturno' %}
+                                            <i class="bi bi-moon-stars-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
+                                        {% else %}
+                                            <i class="bi bi-sun-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="mb-0"><strong>{{report.responsavel}}</strong></h3>
+                                        <p class="text-secondary mb-1">{{ report.dia }}</p>
+                                        {% if report.status == True %}
+                                            <span class="bg-success-subtle p-1 rounded-pill text-success border border-success">Aberto</span>
+                                        {% else %}
+                                            <span class="bg-danger-subtle p-1 rounded-pill text-danger border border-danger">Fechado</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <a href="{{url_for('relatorio', id_relatorio=report.id, empresa=current_user.company, ufv=' ')}}">
+                                            <button class="btn btn-secondary col-9">Visualizar</button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% for report in closed_reports %}
+                            <div class="card-relatAberto border mt-4 me-2 col-2 p-2 rounded-4 bg-white">
+                                <div class="text-center d-flex flex-column">
+                                    <div class="mb-1">
+                                        {% if report.turno == 'noturno' %}
+                                            <i class="bi bi-moon-stars-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
+                                        {% else %}
+                                            <i class="bi bi-sun-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-4">
+                                        <h3 class="mb-0"><strong>Isaias</strong></h3>
+                                        <p class="text-secondary mb-1">{{ report.dia }}</p>
+                                        {% if report.status == True %}
+                                            <span class="bg-success-subtle p-1 rounded-pill text-success border border-success">Aberto</span>
+                                        {% else %}
+                                            <span class="bg-danger-subtle p-1 rounded-pill text-danger border border-danger">Fechado</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <a href="{{url_for('relatorio', id_relatorio=report.id, empresa=current_user.company, ufv='')}}">
+                                            <button class="btn btn-secondary col-9">Visualizar</button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    
+{% endblock %}

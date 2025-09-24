@@ -1,4 +1,8 @@
-{% extends 'base.html' %}
+{% if current_user.level == 'gestor' %}
+    {% extends 'base_gestor.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
 
 {% block content %}
 
@@ -14,11 +18,15 @@
                     {% else %} col-6
                     {% endif %}
                 ">
-                    <select id="empresas-select" class="form-select">
-                        <option value="Athon">Athon</option>
-                        <option value="Mirai">Mirai</option>
-                        <option value="Aevo">Aevo</option>
-                    </select>
+                    {% if current_user.level == 'gestor' %}
+                        <input id="empresas-select" class="form-control" value="{{current_user.company}}" disabled>
+                    {% else %}
+                        <select id="empresas-select" class="form-select">
+                            <option value="Athon">Athon</option>
+                            <option value="Mirai">Mirai</option>
+                            <option value="Aevo">Aevo</option>
+                        </select>
+                    {% endif %}    
                 </div>
                 <div class="
                     {% if status == True and id_responsible == current_user.id %} col-5
@@ -322,6 +330,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Impede que usuario ultilize URL para acessar outras usinas -->
+     <script>
+        let parametros = window.location.pathname;
+        parametros =  parametros.split('/')
+        empresa_url = parametros[3]
+        if(empresa_url != `{{current_user.company}}`){
+            window.location.href = "{{ url_for('gestor', empresa=current_user.company) }}";
+        }
+     </script>
       
     <script>
         document.getElementById('icon-relatorios').classList.add('bg-body-secondary')

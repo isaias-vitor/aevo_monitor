@@ -216,7 +216,7 @@ def add_user(nome, email, senha, nivel, empresa):
             'empresa':empresa
         }).execute()
     except Exception as e:
-        flash(f'Erro ao inserir usuário no banco de dados: {str(e)}')
+        print(f'Erro ao inserir usuário no banco de dados: {str(e)}')
 
 
 

@@ -57,11 +57,15 @@ def login():
         senha = form_login.password.data
         login_unlock = db.search_login(user)
         if login_unlock:
+            senha.encode("utf-8")
             if bcrypt.checkpw(senha.encode("utf-8"), login_unlock['senha'].encode("utf-8")):  
                 user_obj = User(login_unlock['id'], login_unlock['email'], login_unlock['nome'], login_unlock['senha'], login_unlock['nivel'], login_unlock['empresa'])
                 login_user(user_obj)
-                return redirect(url_for('home'))
-        flash("Usuário ou senha inválidos!", "danger")
+                if login_unlock['nivel'] == 'gestor':
+                    return redirect(url_for('gestor', empresa = login_unlock['empresa']))
+                else:
+                    return redirect(url_for('home'))
+        print("Usuário ou senha inválidos!", "danger")
     return render_template('login.html', form=form_login)
 
 @app.route('/relatorio/<int:id_relatorio>/<empresa>/<ufv>', methods=['GET', 'POST'])
@@ -141,7 +145,6 @@ def relatorio(id_relatorio, empresa, ufv):
 def relatorios():
     closed_reports = db.show_all_closed_reports()
     open_reports = db.show_all_open_reports()
-    reports = closed_reports + open_reports
 
     for report in closed_reports:
         report['responsavel'] = db.search_name_user(report['responsavel'])
@@ -307,7 +310,7 @@ def usuarios():
         empresa = form_add_user.company_add_user.data
         senha = 'Aevo@123'
         senha = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-        db.add_user(nome, email, senha, nivel, empresa)
+        db.add_user(nome, email, senha.decode('utf-8'), nivel, empresa)
         return redirect(url_for('usuarios'))
     
     elif form_edit_user.validate_on_submit() and form_edit_user.submit_edit_user.data:
@@ -337,6 +340,20 @@ def usuarios():
                            form_delete_user = form_delete_user,
                            form_new_password = form_new_password
                            )
+
+@app.route('/gestor', methods=['GET', 'POST'])
+@login_required
+@role_required('gestor')
+def gestor():
+    closed_reports = db.show_all_closed_reports()
+    open_reports = db.show_all_open_reports()
+
+    for report in closed_reports:
+        report['responsavel'] = db.search_name_user(report['responsavel'])
+    for report in open_reports:
+        report['responsavel'] = db.search_name_user(report['responsavel'])
+
+    return render_template('gestor.html', open_reports = open_reports, closed_reports = closed_reports)
 
 @app.route('/logout')
 @login_required
