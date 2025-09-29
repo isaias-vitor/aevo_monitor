@@ -123,6 +123,15 @@ def id_responsible(id_report):
     responsible = supabase.table('relatorios').select('responsavel').eq('id', id_report).execute()
     return responsible.data[0]
 
+# Busca as ocorrencias de um relatorio
+def show_occurrences_report(id_report):
+    try:
+        occurrences = supabase.table('ocorrencias').select('*').eq('id_relatorio', id_report).execute()
+        return occurrences.data
+    except Exception as e:
+        flash(f'Erro ao buscar ocorrencias: {str(e)}')
+        print(f'Erro ao buscar ocorrencias: {str(e)}')
+
 
 
 # Cria um relatório aberto para associado ao usuário

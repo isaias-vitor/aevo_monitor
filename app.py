@@ -76,6 +76,7 @@ def relatorio(id_relatorio, empresa, ufv):
     id_responsible = int(db.id_responsible(id_relatorio)['responsavel'])
     cams = db.show_cams(ufv)
     cams_closed_report = db.show_cams_closed_report(id_relatorio)[0]['dados'] if not status else []
+    occurrences_report = db.show_occurrences_report(id_relatorio)
     reports.sort(key=lambda x: x["id"])
 
     form_elipse = CreateRecord()
@@ -167,7 +168,8 @@ def relatorio(id_relatorio, empresa, ufv):
                            id_responsible = id_responsible,
                            form_add_occurrence = form_add_occurrence,
                            form_edit_occurrence = form_edit_occurrence,
-                           form_delete_occurrence = form_delete_occurrence) 
+                           form_delete_occurrence = form_delete_occurrence,
+                           occurrences_report = occurrences_report) 
 
 @app.route('/relatorios', methods=['GET', 'POST'])
 @login_required
