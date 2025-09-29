@@ -92,10 +92,10 @@
                                     </td>
                                     <td class="text-end">
                                         <button class="btn btn-link btn-edit rounded-circle btn-sm text-warning p-1" onclick="modalElipse(this)">
-                                            <i data-lucide="pencil"></i>
+                                            <i class='bxr bxs-edit-alt text-secondary' style="font-size:1.5rem"></i> 
                                         </button>
                                         <button class="btn btn-link btn-delete rounded-circle btn-sm text-danger p-1" onclick="modalDeleteElipse(this)">
-                                            <i data-lucide="trash"></i>
+                                            <i class='bxr bxs-trash-x text-secondary' style="font-size:1.5rem"></i> 
                                         </button>
                                     </td>
                                 </tr>
@@ -148,11 +148,14 @@
         </div>
         <div id="ocorrencias" class="container row mt-4 p-0">
             <div class="col">
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mb-1">
                     <h4>Ocorrências</h4>
-                    {% if status %}
-                        <i data-lucide="plus"></i>
+                    {% if status and current_user.level == 'monitor'%}
+                        <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="modalOccurence(this)">
+                            <i class='bxr bx-plus'></i> 
+                        </button>
                     {% endif %}
+
                 </div>
                 <div class="container bg-light-subtle border rounded-3 p-3">
                     <table id="tabela-ocorrencia" class="table table-borderless table-sm m-0 rounded-3 p-5">
@@ -331,15 +334,93 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-ocorrencia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalOcorrencia" class="modal-title fs-5">Nova Ocorrência</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-addOccurrence" method="post">
+
+                    {{ form_add_occurrence.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <label class="form-label">Data</label>
+                                {{ form_add_occurrence.date_add_occurrence(class='form-control') }}
+                            </div>
+                            <div class="col-3">
+                                <label class="form-label">Horário</label>
+                                {{ form_add_occurrence.hour_add_occurrence(class='form-control') }}
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label">Status</label>
+                                {{ form_add_occurrence.status_add_occurrence(class='form-select') }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Ações</label>
+                                {{ form_add_occurrence.actions_add_occurrence(class='form-control') }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                {{ form_add_occurrence.observations_add_occurrence(class='form-control') }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_add_occurrence.submit_add_occurrence(class='btn btn-primary') }}
+                    </div>
+                </form>
+
+                <form id="form-editUFV" hidden method="post">
+
+                    {{ form_edit_record.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Horário</label>
+                                {{ form_edit_record.timeEditElipse() }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Status</label>
+                                {{ form_edit_record.statusEditElipse() }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                {{ form_edit_record.observationEditElipse() }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_edit_record.id_recordEditElipse(class="visually-hidden") }}
+                        {{ form_edit_record.submit_edit_record() }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Impede que usuario ultilize URL para acessar outras usinas -->
-     <script>
-        let parametros = window.location.pathname;
-        parametros =  parametros.split('/')
-        empresa_url = parametros[3]
-        if(empresa_url != `{{current_user.company}}`){
-            window.location.href = "{{ url_for('gestor', empresa=current_user.company) }}";
-        }
-     </script>
+     {% if current_user.level == 'gestor' %}
+        <script>
+            let parametros = window.location.pathname;
+            parametros =  parametros.split('/')
+            empresa_url = parametros[3]
+            if(empresa_url != `{{current_user.company}}`){
+                window.location.href = "{{ url_for('gestor', empresa=current_user.company) }}";
+            }
+        </script>
+    {% endif %}
       
     <script>
         document.getElementById('icon-relatorios').classList.add('bg-body-secondary')
@@ -432,6 +513,45 @@
             let modal = new bootstrap.Modal(document.getElementById('modal-delete-elipse'));
             modal.show();
         }
+    </script>
+
+    <script>
+        function modalOccurence(botao) {
+
+        if(botao.classList.contains('btn-edit')){
+            document.getElementById('tituloModalOccurrence').innerText = 'Editar Ocorência'
+            document.getElementById('form-addOccurence').hidden = true;
+            // document.getElementById('form-editOccurence').hidden = false;
+            let linha = botao.closest('tr')
+            let dados = linha.querySelectorAll('td');
+            let valores = Array.from(dados).slice(0, -1).map(td => td.innerText);
+            
+            // document.getElementById('id_recordEditElipse').value = linha.id;
+            // document.getElementById('timeEditElipse').value = valores[0]
+            // document.getElementById('statusEditElipse').value = valores[1]
+            // if(valores[2] != '-' ) {
+            //     document.getElementById('observationEditElipse').value = valores[2]
+            // }else{
+            //     document.getElementById('observationEditElipse').value = ''
+            // }
+        }else{
+            // document.getElementById('form-editUFV').hidden = true;
+            document.getElementById('form-addOccurrence').hidden = false;
+        }
+
+        let modal = new bootstrap.Modal(document.getElementById('modal-ocorrencia'));
+        modal.show();
+        }
+
+        // function modalDeleteElipse(botao){
+        // if(botao.classList.contains('btn-delete')){
+        //     let linha = botao.closest('tr')
+        //     document.getElementById('id_recordDeleteElipse').value = linha.id;
+        // }
+
+        // let modal = new bootstrap.Modal(document.getElementById('modal-delete-elipse'));
+        // modal.show();
+        // }
     </script>
 
     {% if status %}

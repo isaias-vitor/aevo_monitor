@@ -83,6 +83,9 @@ def relatorio(id_relatorio, empresa, ufv):
     form_edit_record = EditRecord()
     form_delete_record = DeleteRecord()
     form_edit_cam_record = EditCamRecord()
+    form_add_occurrence = AddOccurrence()
+    form_edit_occurrence = EditOccurrence()
+    form_delete_occurrence = DeleteOccurrence()
 
     empresas = {
         'Athon': ['Brasilia 100', 'Brasilia 200', 'Morro Agudo 100', 'Tres Lagoas 100', 'Buritizeiro 100', 'Bela Vista de Goias 100', 'Santa Rita 100'],
@@ -122,6 +125,29 @@ def relatorio(id_relatorio, empresa, ufv):
         obs = form_edit_cam_record.obs_edit_cam_record.data
         db.edit_cam_report(id_edit_cam, status, obs)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+    
+    elif form_add_occurrence.validate_on_submit() and form_add_occurrence.submit_add_occurrence.data:
+        data = str(form_add_occurrence.date_add_occurrence.data)
+        horario = str(form_add_occurrence.hour_add_occurrence.data)
+        status = form_add_occurrence.status_add_occurrence.data
+        acoes = form_add_occurrence.actions_add_occurrence.data
+        observacoes = form_add_occurrence.observations_add_occurrence.data
+        db.add_occurrence(horario, status, acoes, observacoes, id_relatorio, empresa, ufv, data, current_user.nome)
+        return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+    
+    elif form_edit_occurrence.validate_on_submit() and form_edit_occurrence.submit_edit_occurrence.data:
+        id_relatorio_edit_occurence = form_edit_occurrence.id_report.data
+        horario_edit_occurence = form_edit_occurrence.hour_edit_occurrence.data
+        status_edit_occurrence = form_edit_occurrence.status_edit_occurrence.data
+        acoes_edit_occurrence = form_edit_occurrence.actions_edit_occurrence.data
+        observacoes_edit_occurrence = form_edit_occurrence.observations_edit_occurrence.data
+        db.edit_occurrence(horario_edit_occurence, status_edit_occurrence, acoes_edit_occurrence, observacoes_edit_occurrence, id_relatorio_edit_occurence)
+        return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+    
+    elif form_delete_occurrence.validate_on_submit() and form_delete_occurrence.submit_delete_occurrence.data:
+        id_delete_occurence = form_delete_occurrence.id_report.data
+        db.delete_occurrence(id_delete_occurence)
+        return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
 
 
     return render_template('relatorio_aberto.html', 
@@ -138,7 +164,10 @@ def relatorio(id_relatorio, empresa, ufv):
                            status = status,
                            cams = cams,
                            cams_closed_report = cams_closed_report,
-                           id_responsible = id_responsible) 
+                           id_responsible = id_responsible,
+                           form_add_occurrence = form_add_occurrence,
+                           form_edit_occurrence = form_edit_occurrence,
+                           form_delete_occurrence = form_delete_occurrence) 
 
 @app.route('/relatorios', methods=['GET', 'POST'])
 @login_required
@@ -354,6 +383,39 @@ def gestor():
         report['responsavel'] = db.search_name_user(report['responsavel'])
 
     return render_template('gestor.html', open_reports = open_reports, closed_reports = closed_reports)
+
+@app.route('/ocorrencias', methods=['GET', 'POST'])
+@login_required
+def ocorrencias():
+    form_add_occurrence = AddOccurrence()
+    form_edit_occurrence = EditOccurrence()
+    form_delete_occurrence = DeleteOccurrence()
+
+    if form_add_occurrence.validate_on_submit() and form_add_occurrence.submit_add_occurrence.data():
+        id_relatorio_add_occurence = form_add_occurrence.id_report.data
+        horario_add_occurence = form_add_occurrence.hour_add_occurrence.data
+        status_add_occurrence = form_add_occurrence.status_add_occurrence.data
+        acoes_add_occurrence = form_add_occurrence.actions_add_occurrence.data
+        observacoes_add_occurrence = form_add_occurrence.observations_add_occurrence.data
+        db.add_occurrence(horario_add_occurence, status_add_occurrence, acoes_add_occurrence, observacoes_add_occurrence, id_relatorio_add_occurence)
+        return redirect(url_for('ocorrencias'))
+    
+    elif form_edit_occurrence.validate_on_submit() and form_edit_occurrence.submit_edit_occurrence.data():
+        id_relatorio_edit_occurence = form_edit_occurrence.id_report.data
+        horario_edit_occurence = form_edit_occurrence.hour_edit_occurrence.data
+        status_edit_occurrence = form_edit_occurrence.status_edit_occurrence.data
+        acoes_edit_occurrence = form_edit_occurrence.actions_edit_occurrence.data
+        observacoes_edit_occurrence = form_edit_occurrence.observations_edit_occurrence.data
+        db.edit_occurrence(horario_edit_occurence, status_edit_occurrence, acoes_edit_occurrence, observacoes_edit_occurrence, id_relatorio_edit_occurence)
+        return redirect(url_for('ocorrencias'))
+    
+    elif form_delete_occurrence.validate_on_submit() and form_delete_occurrence.submit_delete_occurrence.data():
+        id_delete_occurence = form_delete_occurrence.id_report.data
+        db.delete_occurrence(id_delete_occurence)
+        return redirect(url_for('ocorrencias'))
+    
+    return render_template('ocorrencias.html')
+
 
 @app.route('/logout')
 @login_required

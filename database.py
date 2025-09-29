@@ -218,6 +218,30 @@ def add_user(nome, email, senha, nivel, empresa):
     except Exception as e:
         print(f'Erro ao inserir usuário no banco de dados: {str(e)}')
 
+# Adicionar ocorrencia
+def add_occurrence(horario, status, acoes, observacoes, id_relatorio, empresa, usina, data, responsavel):
+    try:
+        data_br = data.split('-')
+        day = data_br[2]
+        month = data_br[1]
+        year = data_br[0]
+        data = f'{day}/{month}/{year}'
+        horario = horario[0:6]
+        supabase.table('ocorrencias').insert({
+            'horario':horario,
+            'status':status,
+            'acoes':acoes, 
+            'observacoes':observacoes,
+            'id_relatorio':id_relatorio,
+            'empresa':empresa,
+            'usina':usina,
+            'data':data,
+            'responsavel':responsavel
+        }).execute()
+    except Exception as e:
+        print(f'Erro ao editar ocorrencia: {e}')
+        flash(f'Erro ao editar ocorrencia! {e}')
+
 
 
 # Edita registro de relatório Elipse
@@ -307,6 +331,19 @@ def edit_new_password(id_user, senha):
         supabase.table('usuarios').update({'senha': senha}).eq('id', id_user).execute()
     except Exception as e:
         print(f'Erro ao alterar senha: {str(e)}')
+
+# Edita ocorrência
+def edit_occurrence(id_ocorrencia, horario, status, acoes, observacoes):
+    try:
+        supabase.table('ocorrencias').update({
+            'horario':horario,
+            'status':status,
+            'acoes':acoes, 
+            'observacoes':observacoes,
+        }).eq('id', id_ocorrencia).execute()
+    except Exception as e:
+        print(f'Erro ao editar ocorrencia: {e}')
+        flash(f'Erro ao editar ocorrencia! {e}')
 
 
 

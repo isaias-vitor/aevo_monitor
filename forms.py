@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, SelectField, PasswordField, TelField
+from wtforms import StringField, TextAreaField, SubmitField, SelectField, PasswordField, TelField, TimeField, DateField
 from wtforms.validators import DataRequired
 
 class CreateReport(FlaskForm):
@@ -10,6 +10,7 @@ class CreateRecord(FlaskForm):
     status = SelectField('status', choices=[
         ('Ok', 'Ok'),
         ('Sem conexão', 'Sem conexão'),
+        ('Religamento', 'Religamento'),
         ('Incêndio', 'Incêndio'),
         ('Furto', 'Furto'),
         ('Invasão', 'Invasão')
@@ -25,6 +26,7 @@ class EditRecord(FlaskForm):
     statusEditElipse = SelectField('status', choices=[
         ('Ok', 'Ok'),
         ('Sem conexão', 'Sem conexão'),
+        ('Religamento', 'Religamento'),
         ('Incêndio', 'Incêndio'),
         ('Furto', 'Furto'),
         ('Invasão', 'Invasão')
@@ -171,3 +173,41 @@ class NewPassword(FlaskForm):
     id_new_password = StringField()
     new_password = StringField()
     submit_new_password = SubmitField('Salvar')
+
+class AddOccurrence(FlaskForm):
+    id_report = StringField()
+    company_add_occurrence = StringField()
+    ufv_add_occurrence = StringField()
+    date_add_occurrence = DateField()
+    hour_add_occurrence = TimeField()
+    status_add_occurrence = SelectField(choices=[
+        ('religamento', 'Religamento'),
+        ('furto', 'Furto'),
+        ('invasao', 'Invasao'),
+        ('incendio', 'Incêndio'),
+        ('outro', 'Outro')
+    ])
+    actions_add_occurrence = TextAreaField()
+    observations_add_occurrence = TextAreaField()
+    submit_add_occurrence = SubmitField('Salvar')
+
+class EditOccurrence(FlaskForm):
+    id_edit_orcurrence = StringField()
+    company_edit_occurence = StringField()
+    ufv_edit_company = StringField()
+    date_edit_occurence = DateField()
+    hour_edit_occurrence = TimeField()
+    status_edit_occurrence = SelectField(choices=[
+        ('religamento', 'Religamento'),
+        ('furto', 'Furto'),
+        ('invasao', 'Invasao'),
+        ('incendio', 'Incêndio'),
+        ('outro', 'Outro')
+    ])
+    actions_edit_occurrence = TextAreaField()
+    observations_edit_occurrence = TextAreaField()
+    submit_edit_occurrence = SubmitField('Editar')
+
+class DeleteOccurrence(FlaskForm):
+    id_delete_orcurrence = StringField()
+    submit_delete_occurrence = SubmitField('Excluir')

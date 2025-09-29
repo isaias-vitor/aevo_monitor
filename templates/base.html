@@ -38,7 +38,7 @@
                                 <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('senhas')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Banco de Credenciais" id="icon-senhas"><i class='bxr bx-key-alt text-secondary'></i> </a>
                             </div>
                             <div class="d-flex justify-content-center mt-1">
-                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Ocorrências - Indisponível" id="icon-senhas"><i class='bxr bx-alert-octagon'></i> </a>
+                                <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('ocorrencias')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Ocorrências" id="icon-senhas"><i class='bxr bx-alert-octagon'></i> </a>
                             </div>
                             {% if current_user.level == 'adm' %}
                                 <hr class="hr my-1">

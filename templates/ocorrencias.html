@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5 p-0">
+    <div id="top" class="my-5 d-flex justify-content-between align-items-center">
+        <h2 class="d-inline col-8 m-0 mt-5">Ocorrências</strong></h2>
+    </div>
+
+    <div class="container bg-light-subtle border rounded-3 p-3">
+        <table id="tabela-usuarios" class="table table-sm table-hover m-0 rounded-3 p-5">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">#</th>
+                    <th scope="col" class="text-center">Empresa</th>
+                    <th scope="col" class="text-center">Usina</th>
+                    <th scope="col" class="text-center">Data</th>
+                    <th scope="col" class="text-center">Horário</th>
+                    <th scope="col" class="text-center">Status</th>
+                    <th scope="col" class="text-center">Responsável</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row" class="text-center">1</th>
+                    <td class="text-center">Athon</td>
+                    <td class="text-center">Brasília 200</td>
+                    <td class="text-center">15/02/2002</td>
+                    <td class="text-center">07:02</td>
+                    <td class="text-center">Religamento</td>
+                    <td class="text-center">Isaias</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
