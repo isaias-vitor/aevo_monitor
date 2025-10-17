@@ -33,6 +33,8 @@ def load_user(user_id):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    open_report = db.show_open_report(current_user.id)
+    print(f'*******************{open_report}')
     open_reports = db.show_all_open_reports()
     closed_reports = db.show_closed_reports(10 - len(open_reports))
     reports = open_reports + closed_reports
@@ -47,7 +49,7 @@ def home():
         flash('Login bem sucedido!', 'success')
         return redirect(url_for('home'))
     
-    return render_template('index.html', form = form, reports = reports)
+    return render_template('index.html', form = form, reports = reports, open_report = open_report)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -137,12 +139,14 @@ def relatorio(id_relatorio, empresa, ufv):
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
     elif form_edit_occurrence.validate_on_submit() and form_edit_occurrence.submit_edit_occurrence.data:
-        id_relatorio_edit_occurence = form_edit_occurrence.id_report.data
-        horario_edit_occurence = form_edit_occurrence.hour_edit_occurrence.data
-        status_edit_occurrence = form_edit_occurrence.status_edit_occurrence.data
-        acoes_edit_occurrence = form_edit_occurrence.actions_edit_occurrence.data
-        observacoes_edit_occurrence = form_edit_occurrence.observations_edit_occurrence.data
-        db.edit_occurrence(horario_edit_occurence, status_edit_occurrence, acoes_edit_occurrence, observacoes_edit_occurrence, id_relatorio_edit_occurence)
+        print('entrou 2')
+        id_edit_occurrence = form_edit_occurrence.id_edit_occurrence.data
+        data = form_edit_occurrence.date_edit_occurence.data
+        horario = form_edit_occurrence.hour_edit_occurrence.data
+        status = form_edit_occurrence.status_edit_occurrence.data
+        acoes = form_edit_occurrence.actions_edit_occurrence.data
+        observacoes = form_edit_occurrence.observations_edit_occurrence.data
+        db.edit_occurrence(id_edit_occurrence, data, horario, status, acoes, observacoes)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
     elif form_delete_occurrence.validate_on_submit() and form_delete_occurrence.submit_delete_occurrence.data:
@@ -425,5 +429,5 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

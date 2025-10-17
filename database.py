@@ -31,6 +31,16 @@ def search_name_user(id_user):
 
 
 
+# Busca por relatório aberto em nome do usuário
+def show_open_report(user_id):
+    try:
+        report = supabase.table('relatorios').select('dia').eq('responsavel', user_id).eq('status', 'TRUE').limit(1).execute()
+        return report.data
+    except Exception as e:
+        error_message = f'Erro ao verificar se o usuario ja tem relatorio aberto: {str(e)}'
+        flash(error_message)
+        print(error_message)
+
 # Busca por relatórios abertos
 def show_all_open_reports():
     try:
@@ -342,9 +352,17 @@ def edit_new_password(id_user, senha):
         print(f'Erro ao alterar senha: {str(e)}')
 
 # Edita ocorrência
-def edit_occurrence(id_ocorrencia, horario, status, acoes, observacoes):
+def edit_occurrence(id_ocorrencia, data, horario, status, acoes, observacoes):
+    print('entrou')
     try:
+        data_br = data.split('-')
+        day = data_br[2]
+        month = data_br[1]
+        year = data_br[0]
+        data = f'{day}/{month}/{year}'
+        horario = horario[0:6]
         supabase.table('ocorrencias').update({
+            'data':data,
             'horario':horario,
             'status':status,
             'acoes':acoes, 

@@ -158,7 +158,7 @@
 
                 </div>
                 <div class="container bg-light-subtle border rounded-3 p-3">
-                    <table id="tabela-ocorrencia" class="table table-borderless table-sm m-0 rounded-3 p-5">
+                    <table id="tabela-ocorrencias" class="table table-borderless table-hover table-sm m-0 rounded-3 p-5">
                         <thead>
                             <tr>
                                 <th scope="col" class="text-center">#</th>
@@ -172,11 +172,11 @@
                         <tbody>
                             {% for occurrence in occurrences_report %}
                                 {% if occurrence.usina == ufv_aberto %}
-                                    <tr>
+                                    <tr data-id="{{occurrence.id}}" data-data="{{occurrence.data}}" data-horario="{{occurrence.horario}}" data-status="{{occurrence.status}}" data-acoes="{{occurrence.acoes}}" data-obs="{{occurrence.observacoes}}">
                                         <th scope="row" class="text-center">{{occurrence.id}}</th>
                                         <td class="text-center">{{occurrence.data}}</td>
                                         <td class="text-center">{{occurrence.horario}}</td>
-                                        <td class="text-center">{{occurrence.status}}</td>
+                                        <td class="text-center text-capitalize">{{occurrence.status}}</td>
                                         <td> {{occurrence.acoes}} </td>
                                         <td> {{occurrence.observacoes}} </td>
                                     </tr>
@@ -313,7 +313,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 id="tituloModalOcorrencia" class="modal-title fs-5">Nova Ocorrência</h1>
+                    <h1 id="titulo-ModalOccurrence" class="modal-title fs-5">Nova Ocorrência</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -354,31 +354,48 @@
                     </div>
                 </form>
 
-                <form id="form-editUFV" hidden method="post">
+                <form id="form-editOccurrence" hidden method="post">
 
-                    {{ form_edit_record.hidden_tag() }}
+                    {{ form_edit_occurrence.hidden_tag() }}
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-6">
-                                <label class="form-label">Horário</label>
-                                {{ form_edit_record.timeEditElipse() }}
+                            <div class="col-4">
+                                <label class="form-label">Data</label>
+                                {{ form_edit_occurrence.date_edit_occurrence(class='form-control') }}
                             </div>
-                            <div class="col-6">
+                            <div class="col-3">
+                                <label class="form-label">Horário</label>
+                                {{ form_edit_occurrence.hour_edit_occurrence(class='form-control') }}
+                            </div>
+                            <div class="col-5">
                                 <label class="form-label">Status</label>
-                                {{ form_edit_record.statusEditElipse() }}
+                                {{ form_edit_occurrence.status_edit_occurrence(class='form-select') }}
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <label class="form-label">Ações</label>
+                                {{ form_edit_occurrence.actions_edit_occurrence(class='form-control') }}
                             </div>
                         </div>
                         <div class="row mt-4">
                             <div class="col-12">
                                 <label class="form-label">Observações</label>
-                                {{ form_edit_record.observationEditElipse() }}
+                                {{ form_edit_occurrence.observations_edit_occurrence(class='form-control') }}
                             </div>
                         </div>
                     </div>
                     
                     <div class="modal-footer">
-                        {{ form_edit_record.id_recordEditElipse(class="visually-hidden") }}
-                        {{ form_edit_record.submit_edit_record() }}
+                        {{ form_edit_occurrence.id_edit_occurrence(class="visually-hidden") }}
+                        <div class="d-flex">
+                            <div class="col-6 px-1 py-2">
+                                {{ form_edit_occurrence.submit_edit_occurrence(class='btn btn-primary col-12') }}
+                            </div>
+                            <div class="col-6 px-1 py-2">
+                                <button type="button" data-bs-target="#modal-deleteUser" data-bs-toggle="modal" class="btn btn-danger col-12" name="btn-form_edit_userdeleteUser" id="btn-deleteUsert">Excluir</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -424,17 +441,14 @@
         
         empresaSelect.value = empresa;
         usinaSelect.innerHTML = '';
-        let contadorPrimiero = 0;
         optionsEmpresas[empresa].forEach(ufv => {
             const option = document.createElement('option');
-            if(contadorPrimiero == 0){
-                contadorPrimiero++;
-                option.selected = true;
-            }
             option.value = ufv;
             option.text = ufv;
             usinaSelect.appendChild(option);
         });
+
+        usinaSelect.value = `{{ufv_aberto}}`
 
         empresaSelect.addEventListener('change', function(){
             const urlBase = "{{ url_for('relatorio', id_relatorio = id_relatorio, empresa = '_EMPRESA_', ufv = '_UFV_') }}"
@@ -491,32 +505,32 @@
     </script>
 
     <script>
-        function modalOccurence(botao) {
 
-        if(botao.classList.contains('btn-edit')){
-            document.getElementById('tituloModalOccurrence').innerText = 'Editar Ocorência'
-            document.getElementById('form-addOccurence').hidden = true;
-            // document.getElementById('form-editOccurence').hidden = false;
-            let linha = botao.closest('tr')
-            let dados = linha.querySelectorAll('td');
-            let valores = Array.from(dados).slice(0, -1).map(td => td.innerText);
-            
-            // document.getElementById('id_recordEditElipse').value = linha.id;
-            // document.getElementById('timeEditElipse').value = valores[0]
-            // document.getElementById('statusEditElipse').value = valores[1]
-            // if(valores[2] != '-' ) {
-            //     document.getElementById('observationEditElipse').value = valores[2]
-            // }else{
-            //     document.getElementById('observationEditElipse').value = ''
-            // }
-        }else{
-            // document.getElementById('form-editUFV').hidden = true;
-            document.getElementById('form-addOccurrence').hidden = false;
-        }
-
-        let modal = new bootstrap.Modal(document.getElementById('modal-ocorrencia'));
-        modal.show();
-        }
+        document.querySelectorAll("#tabela-ocorrencias tbody tr").forEach(tr => {
+            tr.addEventListener("click", () => {
+                const data = tr.dataset.data;
+                const horario = tr.dataset.horario;
+                const status = tr.dataset.status;
+                const acoes = tr.dataset.acoes;
+                const obs = tr.dataset.obs;
+        
+                document.getElementById('form-editOccurrence').hidden = false
+                document.getElementById('form-addOccurrence').hidden = true
+                // document.getElementById('titulo-modalOccurrence').innerText = 'Editar Ocorrencia'
+        
+                document.getElementById('id_edit_occurrence').value = tr.dataset.id;
+                // document.getElementById('id_delete_occurrence').value = tr.dataset.id;
+        
+                document.getElementById("date_edit_occurrence").value = data;
+                document.getElementById("hour_edit_occurrence").value = horario;
+                document.getElementById("status_edit_occurrence").value = status;
+                document.getElementById("actions_edit_occurrence").value = acoes;
+                document.getElementById("observations_edit_occurrence").value = obs;
+        
+                const modal = new bootstrap.Modal(document.getElementById("modal-ocorrencia"));
+                modal.show();
+            });
+        });
 
         // function modalDeleteElipse(botao){
         // if(botao.classList.contains('btn-delete')){

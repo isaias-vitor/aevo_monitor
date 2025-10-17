@@ -192,10 +192,10 @@ class AddOccurrence(FlaskForm):
     submit_add_occurrence = SubmitField('Salvar')
 
 class EditOccurrence(FlaskForm):
-    id_edit_orcurrence = StringField()
+    id_edit_occurrence = StringField()
     company_edit_occurence = StringField()
-    ufv_edit_company = StringField()
-    date_edit_occurence = DateField()
+    ufv_edit_occurrence = StringField()
+    date_edit_occurrence = DateField()
     hour_edit_occurrence = TimeField()
     status_edit_occurrence = SelectField(choices=[
         ('religamento', 'Religamento'),

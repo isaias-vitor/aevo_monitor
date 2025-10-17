@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Meu Site</a>
+
+    <div class="d-flex align-items-center">
+      <!-- Ícone com dropdown -->
+      <div class="dropdown">
+        <a 
+          href="#" 
+          class="btn btn-light" 
+          id="menuDropdown" 
+          data-bs-toggle="dropdown" 
+          aria-expanded="false"
+          data-bs-toggle-second="tooltip" 
+          data-bs-placement="bottom" 
+          title="Abrir menu"
+        >
+          <i class="bi bi-three-dots-vertical"></i>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuDropdown">
+          <li><a class="dropdown-item" href="#">Perfil</a></li>
+          <li><a class="dropdown-item" href="#">Configurações</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#">Sair</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
