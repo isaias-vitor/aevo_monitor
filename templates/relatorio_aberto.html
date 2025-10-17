@@ -151,7 +151,7 @@
                 <div class="d-flex justify-content-between mb-1">
                     <h4>Ocorrências</h4>
                     {% if status and current_user.level == 'monitor'%}
-                        <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="modalOccurence(this)">
+                        <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="new_occurrence()">
                             <i class='bxr bx-plus'></i> 
                         </button>
                     {% endif %}
@@ -313,7 +313,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 id="titulo-ModalOccurrence" class="modal-title fs-5">Nova Ocorrência</h1>
+                    <h1 id="titulo-modalOccurrence" class="modal-title fs-5">Nova Ocorrência</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -354,7 +354,7 @@
                     </div>
                 </form>
 
-                <form id="form-editOccurrence" hidden method="post">
+                <form id="form-editOccurrence" method="post">
 
                     {{ form_edit_occurrence.hidden_tag() }}
                     <div class="modal-body">
@@ -403,7 +403,7 @@
     </div>
 
     <!-- Impede que usuario ultilize URL para acessar outras usinas -->
-     {% if current_user.level == 'gestor' %}
+    {% if current_user.level == 'gestor' %}
         <script>
             let parametros = window.location.pathname;
             parametros =  parametros.split('/')
@@ -508,7 +508,7 @@
 
         document.querySelectorAll("#tabela-ocorrencias tbody tr").forEach(tr => {
             tr.addEventListener("click", () => {
-                const data = tr.dataset.data;
+                var data = tr.dataset.data;
                 const horario = tr.dataset.horario;
                 const status = tr.dataset.status;
                 const acoes = tr.dataset.acoes;
@@ -516,12 +516,17 @@
         
                 document.getElementById('form-editOccurrence').hidden = false
                 document.getElementById('form-addOccurrence').hidden = true
-                // document.getElementById('titulo-modalOccurrence').innerText = 'Editar Ocorrencia'
+                document.getElementById('titulo-modalOccurrence').innerText = 'Editar Ocorrencia'
         
                 document.getElementById('id_edit_occurrence').value = tr.dataset.id;
                 // document.getElementById('id_delete_occurrence').value = tr.dataset.id;
+
+                data = data.split('/')
+                const dia = data[0]
+                const mes = data[1]
+                const ano = data[2]
         
-                document.getElementById("date_edit_occurrence").value = data;
+                document.getElementById("date_edit_occurrence").value = `${ano}-${mes}-${dia}`;
                 document.getElementById("hour_edit_occurrence").value = horario;
                 document.getElementById("status_edit_occurrence").value = status;
                 document.getElementById("actions_edit_occurrence").value = acoes;
@@ -532,15 +537,27 @@
             });
         });
 
-        // function modalDeleteElipse(botao){
-        // if(botao.classList.contains('btn-delete')){
-        //     let linha = botao.closest('tr')
-        //     document.getElementById('id_recordDeleteElipse').value = linha.id;
-        // }
+        function new_occurrence(){
+            document.getElementById('form-addOccurrence').hidden = false
+            document.getElementById('form-editOccurrence').hidden = true
+            document.getElementById('titulo-modalOccurrence').innerText = 'Nova Ocorrência'
 
-        // let modal = new bootstrap.Modal(document.getElementById('modal-delete-elipse'));
-        // modal.show();
-        // }
+            const agora = new Date();
+            const hora = agora.getHours().toString().padStart(2, '0');
+            const minutos = agora.getMinutes().toString().padStart(2, '0');
+
+            alert(`${hora}:${minutos}`)
+
+            document.getElementById("date_add_occurrence").value = agora.toISOString().split('T')[0];
+            document.getElementById("hour_add_occurrence").value = `${hora}:${minutos}`
+            document.getElementById("status_add_occurrence").option = 'Religamento';
+            document.getElementById("actions_add_occurrence").value = '';
+            document.getElementById("observations_add_occurrence").value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById("modal-ocorrencia"));
+            modal.show();
+        }
+
     </script>
 
     {% if status %}
@@ -563,4 +580,8 @@
             });
         </script>
     {% endif %}
+
+    <script>
+        
+    </script>
 {% endblock %}

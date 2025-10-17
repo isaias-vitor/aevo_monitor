@@ -193,8 +193,6 @@ class AddOccurrence(FlaskForm):
 
 class EditOccurrence(FlaskForm):
     id_edit_occurrence = StringField()
-    company_edit_occurence = StringField()
-    ufv_edit_occurrence = StringField()
     date_edit_occurrence = DateField()
     hour_edit_occurrence = TimeField()
     status_edit_occurrence = SelectField(choices=[

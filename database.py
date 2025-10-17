@@ -136,7 +136,7 @@ def id_responsible(id_report):
 # Busca as ocorrencias de um relatorio
 def show_occurrences_report(id_report):
     try:
-        occurrences = supabase.table('ocorrencias').select('*').eq('id_relatorio', id_report).execute()
+        occurrences = supabase.table('ocorrencias').select('*').eq('id_relatorio', id_report).order('id', desc=False).execute()
         return occurrences.data
     except Exception as e:
         flash(f'Erro ao buscar ocorrencias: {str(e)}')

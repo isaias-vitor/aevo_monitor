@@ -34,7 +34,6 @@ def load_user(user_id):
 @login_required
 def home():
     open_report = db.show_open_report(current_user.id)
-    print(f'*******************{open_report}')
     open_reports = db.show_all_open_reports()
     closed_reports = db.show_closed_reports(10 - len(open_reports))
     reports = open_reports + closed_reports
@@ -98,14 +97,14 @@ def relatorio(id_relatorio, empresa, ufv):
 
     
 
-    if form_elipse.submit_create_report.data and form_elipse.validate_on_submit():
+    if form_elipse.validate_on_submit() and form_elipse.submit_create_report.data:
         horario = form_elipse.time.data
         status = form_elipse.status.data
         obs = form_elipse.observation.data
         db.create_record_elipse(id_relatorio, horario, ufv, status, obs)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
-    elif form_edit_record.submit_edit_record.data and form_edit_record.validate_on_submit():
+    elif form_edit_record.validate_on_submit() and form_edit_record.submit_edit_record.data:
         horario = form_edit_record.timeEditElipse.data
         status = form_edit_record.statusEditElipse.data
         obs = form_edit_record.observationEditElipse.data
@@ -113,16 +112,16 @@ def relatorio(id_relatorio, empresa, ufv):
         db.edit_record_elipse(id_record, horario, ufv, status, obs)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
-    elif form_close_report.submit_close_report.data and form_close_report.validate_on_submit():
+    elif form_close_report.validate_on_submit() and  form_close_report.submit_close_report.data:
         db.close_report(str(id_relatorio))
         db.close_cams_report(empresas, id_relatorio)
         return redirect(url_for('home'))
     
-    elif form_delete_record.submit_delete_record.data and form_delete_record.validate_on_submit():
+    elif form_delete_record.validate_on_submit() and form_delete_record.submit_delete_record.data:
         db.delete_record_elipse(form_delete_record.id_recordDeleteElipse.data)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
-    elif form_edit_cam_record.submit_edit_cam_record.data and form_edit_cam_record.validate_on_submit():
+    elif form_edit_cam_record.validate_on_submit() and form_edit_cam_record.submit_edit_cam_record.data:
         id_edit_cam = form_edit_cam_record.id_cam_edit_record.data
         status = form_edit_cam_record.status_edit_cam_record.data
         obs = form_edit_cam_record.obs_edit_cam_record.data
@@ -131,7 +130,7 @@ def relatorio(id_relatorio, empresa, ufv):
     
     elif form_add_occurrence.validate_on_submit() and form_add_occurrence.submit_add_occurrence.data:
         data = str(form_add_occurrence.date_add_occurrence.data)
-        horario = str(form_add_occurrence.hour_add_occurrence.data)
+        horario = str(form_add_occurrence.hour_add_occurrence.data)[:5]
         status = form_add_occurrence.status_add_occurrence.data
         acoes = form_add_occurrence.actions_add_occurrence.data
         observacoes = form_add_occurrence.observations_add_occurrence.data
@@ -139,17 +138,17 @@ def relatorio(id_relatorio, empresa, ufv):
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
     elif form_edit_occurrence.validate_on_submit() and form_edit_occurrence.submit_edit_occurrence.data:
-        print('entrou 2')
+        print('AAAAAAAAAAAAAAAAAAAA')
         id_edit_occurrence = form_edit_occurrence.id_edit_occurrence.data
-        data = form_edit_occurrence.date_edit_occurence.data
-        horario = form_edit_occurrence.hour_edit_occurrence.data
+        data = str(form_edit_occurrence.date_edit_occurrence.data)
+        horario = str(form_edit_occurrence.hour_edit_occurrence.data)[:5]
         status = form_edit_occurrence.status_edit_occurrence.data
         acoes = form_edit_occurrence.actions_edit_occurrence.data
         observacoes = form_edit_occurrence.observations_edit_occurrence.data
         db.edit_occurrence(id_edit_occurrence, data, horario, status, acoes, observacoes)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
-    elif form_delete_occurrence.validate_on_submit() and form_delete_occurrence.submit_delete_occurrence.data:
+    elif form_delete_occurrence.submit_delete_occurrence.data and form_delete_occurrence.validate_on_submit():
         id_delete_occurence = form_delete_occurrence.id_report.data
         db.delete_occurrence(id_delete_occurence)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
