@@ -138,7 +138,6 @@ def relatorio(id_relatorio, empresa, ufv):
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
     elif form_edit_occurrence.validate_on_submit() and form_edit_occurrence.submit_edit_occurrence.data:
-        print('AAAAAAAAAAAAAAAAAAAA')
         id_edit_occurrence = form_edit_occurrence.id_edit_occurrence.data
         data = str(form_edit_occurrence.date_edit_occurrence.data)
         horario = str(form_edit_occurrence.hour_edit_occurrence.data)[:5]
@@ -149,7 +148,7 @@ def relatorio(id_relatorio, empresa, ufv):
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
     elif form_delete_occurrence.submit_delete_occurrence.data and form_delete_occurrence.validate_on_submit():
-        id_delete_occurence = form_delete_occurrence.id_report.data
+        id_delete_occurence = form_delete_occurrence.id_delete_occurrence.data
         db.delete_occurrence(id_delete_occurence)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
 
@@ -415,7 +414,8 @@ def ocorrencias():
         return redirect(url_for('ocorrencias'))
     
     elif form_delete_occurrence.validate_on_submit() and form_delete_occurrence.submit_delete_occurrence.data():
-        id_delete_occurence = form_delete_occurrence.id_report.data
+        id_delete_occurence = form_delete_occurrence.id_delete_occurrence.data
+
         db.delete_occurrence(id_delete_occurence)
         return redirect(url_for('ocorrencias'))
     

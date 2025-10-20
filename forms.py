@@ -207,5 +207,5 @@ class EditOccurrence(FlaskForm):
     submit_edit_occurrence = SubmitField('Editar')
 
 class DeleteOccurrence(FlaskForm):
-    id_delete_orcurrence = StringField()
+    id_delete_occurrence = StringField()
     submit_delete_occurrence = SubmitField('Excluir')

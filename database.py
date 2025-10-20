@@ -409,6 +409,13 @@ def delete_user(id_user):
     except Exception as e:
         flash(f'Erro ao excluir usuário: {str(e)}')
 
+# Exclui ocorrência
+def delete_occurrence(id_occurrence):
+    try:
+        supabase.table('ocorrencias').delete().eq('id', id_occurrence).execute()
+    except Exception as e:
+        print(f'Erro ao excluir a ocorrência: {str(e)}')
+        flash(f'Erro ao excluir a ocorrência: {str(e)}')
 
 
 # Fecha o relatório

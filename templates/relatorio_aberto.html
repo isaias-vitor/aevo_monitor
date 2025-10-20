@@ -172,7 +172,7 @@
                         <tbody>
                             {% for occurrence in occurrences_report %}
                                 {% if occurrence.usina == ufv_aberto %}
-                                    <tr data-id="{{occurrence.id}}" data-data="{{occurrence.data}}" data-horario="{{occurrence.horario}}" data-status="{{occurrence.status}}" data-acoes="{{occurrence.acoes}}" data-obs="{{occurrence.observacoes}}">
+                                    <tr data-id="{{occurrence.id}}" data-data="{{occurrence.data}}" data-horario="{{occurrence.horario}}" data-status="{{occurrence.status}}" data-acoes="{{occurrence.acoes}}" data-obs="{{occurrence.observacoes}}" class="cursor-pointer">
                                         <th scope="row" class="text-center">{{occurrence.id}}</th>
                                         <td class="text-center">{{occurrence.data}}</td>
                                         <td class="text-center">{{occurrence.horario}}</td>
@@ -393,9 +393,32 @@
                                 {{ form_edit_occurrence.submit_edit_occurrence(class='btn btn-primary col-12') }}
                             </div>
                             <div class="col-6 px-1 py-2">
-                                <button type="button" data-bs-target="#modal-deleteUser" data-bs-toggle="modal" class="btn btn-danger col-12" name="btn-form_edit_userdeleteUser" id="btn-deleteUsert">Excluir</button>
+                                <button type="button" data-bs-target="#modal-delete-ocorrencia" data-bs-toggle="modal" class="btn btn-danger col-12" name="btn-delete-ocorrencia" id="btn-deleteOcorrencia">Excluir</button>
                             </div>
                         </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-delete-ocorrencia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalOcorrenciaDelete" class="modal-title fs-5">Excluir Ocorrência</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-deleteRecord" method="post">
+                    {{ form_delete_occurrence.hidden_tag() }}
+                    <div class="modal-body text-center">
+                        Tem certeza que deseja excluir esta ocorrência? Após a confirmação, não será possivel recupera-la.
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_delete_occurrence.id_delete_occurrence(class="visually-hidden") }}
+                        {{ form_delete_occurrence.submit_delete_occurrence(class='btn btn-danger')}}
                     </div>
                 </form>
             </div>
@@ -519,7 +542,7 @@
                 document.getElementById('titulo-modalOccurrence').innerText = 'Editar Ocorrencia'
         
                 document.getElementById('id_edit_occurrence').value = tr.dataset.id;
-                // document.getElementById('id_delete_occurrence').value = tr.dataset.id;
+                document.getElementById('id_delete_occurrence').value = tr.dataset.id;
 
                 data = data.split('/')
                 const dia = data[0]
