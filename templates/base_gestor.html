@@ -23,7 +23,14 @@
             </div>
             <div class="text-end d-flex align-items-center">
                 <div style="width: 25px;">
-                    <img src="https://thumb.ac-illust.com/51/51e1c1fc6f50743937e62fca9b942694_t.jpeg" alt="" class="rounded-circle img-fluid">
+                    <div class="dropdown">
+                        <img src="https://thumb.ac-illust.com/51/51e1c1fc6f50743937e62fca9b942694_t.jpeg" alt="" class="rounded-circle img-fluid dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <ul class="dropdown-menu dropdown-menu-lg-start col-1" style="font-size: 0.85em;">
+                          <li><a class="dropdown-item disabled" href="#">Perfil</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="{{url_for('logout')}}">Sair</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

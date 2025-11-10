@@ -14,6 +14,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def search_login(user):
     try:
         verification = supabase.table('usuarios').select('*').eq('email', user).execute()
+        print(verification.data)
         return verification.data[0] if verification.data else False
     except Exception as e:
         flash(f'Erro ao acessar o banco de dados: {str(e)}', 'danger')

@@ -57,6 +57,7 @@ def login():
         user = form_login.username.data
         senha = form_login.password.data
         login_unlock = db.search_login(user)
+        print(login_unlock)
         if login_unlock:
             senha.encode("utf-8")
             if bcrypt.checkpw(senha.encode("utf-8"), login_unlock['senha'].encode("utf-8")):  
