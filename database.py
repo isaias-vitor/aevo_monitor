@@ -30,7 +30,13 @@ def search_name_user(id_user):
     names = supabase.table('usuarios').select('nome').eq('id', id_user).execute()
     return names.data[0]['nome']
 
-
+def qtd_pages():
+    qtd = supabase.table('relatorios').select('*', count='exact').limit(0).execute()
+    qtd = int(qtd.count)
+    i = 1
+    for i in range (1, 11):
+        if (i * 25) > qtd:
+            return i
 
 # Busca por relatório aberto em nome do usuário
 def show_open_report(user_id):
@@ -142,6 +148,19 @@ def show_occurrences_report(id_report):
     except Exception as e:
         flash(f'Erro ao buscar ocorrencias: {str(e)}')
         print(f'Erro ao buscar ocorrencias: {str(e)}')
+
+# Busca relatorios de uma pagina
+def show_report_page(page):
+    try:
+        page_number = int(page)
+        initial_number = (page_number - 1) * 24
+        final_number = page_number * 24
+        reports = supabase.table('relatorios').select('*').order('id', desc=True).range(initial_number, final_number).execute()
+        return reports.data
+    except Exception as e:
+        flash(f'Erro ao buscar relatórios: {str(e)}')
+        print(f'Erro ao buscar relatórios: {str(e)}')
+
 
 
 

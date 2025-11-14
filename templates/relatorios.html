@@ -6,9 +6,9 @@
     <div id="titulo-pagina " class="my-5 d-flex justify-content-between align-items-center">
         <h2 class="d-inline mt-5 col-8 m-0">Relatórios</h2>
     </div>
-    <div class="d-flex flex-wrap justify-content-center">
-        {% for report in open_reports %}
-            <div class="card-relatAberto border mt-4 me-2 col-2 p-2 rounded-4 bg-white">
+    <div class="d-flex flex-wrap justify-content-center pb-1">
+        {% for report in reports_in_page %}
+            <div class="card-relatAberto border mt-4 me-2 col-2 p-2 mb-4 rounded-4 bg-white">
                 <div class="text-center d-flex flex-column">
                     <div class="mb-1">
                         {% if report.turno == 'noturno' %}
@@ -34,33 +34,46 @@
                 </div>
             </div>
         {% endfor %}
-        {% for report in closed_reports %}
-            <div class="card-relatAberto border mt-4 me-2 col-2 p-2 rounded-4 bg-white">
-                <div class="text-center d-flex flex-column">
-                    <div class="mb-1">
-                        {% if report.turno == 'noturno' %}
-                            <i class="bi bi-moon-stars-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
-                        {% else %}
-                            <i class="bi bi-sun-fill text-light-emphasis" style="font-size: 4.5rem;"></i>
-                        {% endif %}
-                    </div>
-                    <div class="mb-4">
-                        <h3 class="mb-0"><strong>Isaias</strong></h3>
-                        <p class="text-secondary mb-1">{{ report.dia }}</p>
-                        {% if report.status == True %}
-                            <span class="bg-success-subtle p-1 rounded-pill text-success border border-success">Aberto</span>
-                        {% else %}
-                            <span class="bg-danger-subtle p-1 rounded-pill text-danger border border-danger">Fechado</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <a href="{{url_for('relatorio', id_relatorio=report.id, empresa='Athon', ufv='Brasilia 100')}}">
-                            <button class="btn btn-secondary col-9">Visualizar</button>
+
+    </div>
+    <div class="row col-12 justify-content-center">
+        <nav aria-label="Page navigation example" class="mt-5 mb-2">
+            <ul class="pagination justify-content-center">
+                {% if page ==  1 %}
+                    <li class="page-item">
+                        <a class="page-link disabled" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
                         </a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{url_for('relatorios', page = (page - 1))}}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for qtd in range(qtd_pages) %}
+                    {% if (qtd + 1) == page %}
+                        <li class="page-item active"><a class="page-link" href="#">{{qtd + 1}}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="{{url_for('relatorios', page = (qtd + 1))}}">{{qtd + 1}}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page ==  qtd_pages %}
+                    <li class="page-item">
+                        <a class="page-link disabled" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{url_for('relatorios', page = (page + 1))}}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 </div>
 

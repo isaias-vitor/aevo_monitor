@@ -174,18 +174,16 @@ def relatorio(id_relatorio, empresa, ufv):
                            form_delete_occurrence = form_delete_occurrence,
                            occurrences_report = occurrences_report) 
 
-@app.route('/relatorios', methods=['GET', 'POST'])
+@app.route('/relatorios/<int:page>', methods=['GET', 'POST'])
 @login_required
-def relatorios():
-    closed_reports = db.show_all_closed_reports()
-    open_reports = db.show_all_open_reports()
+def relatorios(page):
+    qtd_pages = db.qtd_pages()
+    reports_in_page = db.show_report_page(page)
 
-    for report in closed_reports:
-        report['responsavel'] = db.search_name_user(report['responsavel'])
-    for report in open_reports:
+    for report in reports_in_page:
         report['responsavel'] = db.search_name_user(report['responsavel'])
 
-    return render_template('relatorios.html', closed_reports = closed_reports, open_reports = open_reports)
+    return render_template('relatorios.html', reports_in_page = reports_in_page, page = page, qtd_pages = qtd_pages)
 
 @app.route('/usina/<ufv>', methods=['GET', 'POST'])
 @login_required
