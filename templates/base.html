@@ -46,7 +46,7 @@
                                     <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('usuarios')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Usuários" id="icon-config"><i class='bxr bx-user-id-card text-secondary'></i> </a>
                                 </div>
                                 <div class="d-flex justify-content-center mt-1">
-                                    <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="#" data-bs-toggle="tooltip" data-bs-placement="right" title="Logs - Indisponível" id="icon-config"><i class='bxr  bx-timer text-secondary'></i> </a>
+                                    <a class="navbar-brand m-0 col-12 text-center d-flex justify-content-center align-items-center rounded-2 p-2 text-secondary" href="{{url_for('logs')}}" data-bs-toggle="tooltip" data-bs-placement="right" title="Logs" id="icon-config"><i class='bxr  bx-timer text-secondary'></i> </a>
                                 </div>
                             {% endif %}
                         </div>
@@ -60,18 +60,57 @@
             
             <div class="container-fluid p-0 mb-5">
                 <div class="navbard fixed-top p-2 border-bottom mb-5 bg-light d-flex justify-content-end" style="margin-left: 45px;">
-                    <div class="text-end">
-                        <div style="width: 25px;">
+                    <div class="text-end d-flex justify-content-between">
+                        <!-- <form action="{{url_for('copiar_relatorios', path=request.path)}}" method="post"> -->
+                            <button type="submit" class="btn btn-light d-flex rounded-circle p-2 me-3" data-bs-toggle="modal" data-bs-target="#modal-copia" id="btn-modal-copia">
+                                <i class='bxr bxs-copy-list' data-bs-toggle="tooltip" data-bs-placement="bottom" title="Copiar Relatório"></i> 
+                            </button>
+                        <!-- </form> -->
+                        <div style="width: 25px;" class="d-flex align-items-center">
                             <img src="https://thumb.ac-illust.com/51/51e1c1fc6f50743937e62fca9b942694_t.jpeg" alt="" class="rounded-circle img-fluid">
                         </div>
                     </div>
-                </div>z
+                </div>
                 
                {% block content %} 
                {% endblock %}
             </div>
         </div>
     </div>
+    
+    <div class="modal fade" id="modal-copia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Copiar Relatório</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-copia" action="{{url_for('copiar_relatorios', path=request.path)}}" method="post">
+                        <select class="form-select" name="select-relatorio" id="select-relatorio" onchange="altera_tipo_copia()">
+                            <option value="all" selected>Relatório Geral</option>
+                            <option value="specific">Relatório por Empresa</option>
+                        </select>
+                        <select class="form-select mt-3 visually-hidden mb-4" id="select-empresa">
+                            <option value="Athon" selected>Athon</option>
+                            <option value="Mirai" selected>Mirai</option>
+                        </select>
+                    
+                        <div id="check-ufvs" class="visually-hidden"></div>
+                        <div class="modal-bottom d-flex justify-content-around p-1 mt-3">
+                            <div class="col-6 px-1">
+                                <button type="submit" name="class-report" class="btn btn-secondary col-12" value="completo">Completo</button>
+                            </div>
+                            <div class="col-6 px-1">                        
+                                <button type="submit" name="class-report" class="btn btn-secondary col-12" value="resumido">Resumido</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -83,4 +122,109 @@
     // Inicializa todos os tooltips da página
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+</script>
+
+<script>
+    function altera_tipo_copia(){
+        const tipo_relatorio = document.getElementById('select-relatorio');
+        const select_empresa = document.getElementById('select-empresa');
+        const areaCheck = document.getElementById('check-ufvs')
+        
+        if(tipo_relatorio.value == 'specific'){
+            select_empresa.classList.remove('visually-hidden')
+            areaCheck.classList.remove('visually-hidden')
+        }else if (tipo_relatorio.value == 'all'){
+            select_empresa.classList.add('visually-hidden')
+            areaCheck.classList.add('visually-hidden')
+        }
+    }
+</script>
+
+<script>
+    document.getElementById("btn-modal-copia").addEventListener("click", async () => {
+        const modal = document.getElementById("modal-copia");
+        modal.classList.add("is-active");
+    
+        // busca via AJAX
+        const resp = await fetch("/usinas_copia");
+        const usinas = await resp.json();
+        let empresa = document.getElementById('select-empresa').value
+        const areaCheck = document.getElementById('check-ufvs')
+
+        document.getElementById("check-ufvs").innerHTML = "";
+
+        usinas[empresa].forEach(ufv => {
+
+            const div = document.createElement("div");
+            div.classList.add('form-check')
+
+            const input = document.createElement('input')
+            input.type = "checkbox";
+            input.name = 'optionUFV';
+            input.value = ufv;
+            input.id = ufv;
+            input.classList.add("form-check-input");
+
+            const label = document.createElement('label')
+            label.setAttribute('for', ufv)
+            label.textContent = ufv
+            label.classList.add("form-check-label");
+
+            areaCheck.appendChild(div)
+            div.appendChild(input);
+            div.appendChild(label)
+
+        });
+        
+        document.getElementById("select-empresa").addEventListener("change", function() {
+            empresa = document.getElementById('select-empresa').value
+            
+            document.getElementById("check-ufvs").innerHTML = "";
+
+            usinas[empresa].forEach(ufv => {
+
+                const div = document.createElement("div");
+                div.classList.add('form-check')
+
+                const input = document.createElement('input')
+                input.type = "checkbox";
+                input.name = 'optionUFV';
+                input.value = ufv;
+                input.id = ufv;
+                input.classList.add("form-check-input");
+
+                const label = document.createElement('label')
+                label.setAttribute('for', ufv)
+                label.textContent = ufv
+                label.classList.add("form-check-label");
+
+                areaCheck.appendChild(div)
+                div.appendChild(input);
+                div.appendChild(label)
+
+            });
+        });
+    });
+</script>
+
+<script>
+document.getElementById("form-copia").addEventListener("submit", async function(e) {
+    e.preventDefault(); 
+
+    const form = e.target;
+    const formData = new FormData(form); 
+    formData.append("submit", e.submitter.value);
+
+
+    const resp = await fetch(form.action, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await resp.json();
+
+    await navigator.clipboard.writeText(data.mensagem);
+
+    window.location.href = data.redirect_to;
+});
 </script>

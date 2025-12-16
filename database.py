@@ -30,6 +30,13 @@ def search_name_user(id_user):
     names = supabase.table('usuarios').select('nome').eq('id', id_user).execute()
     return names.data[0]['nome']
 
+def search_ufvs():
+    try:
+        ufvs = supabase.table('usinas').select('nome', 'empresa').execute()
+        return ufvs.data
+    except Exception as e:
+        print(e)
+
 def qtd_pages():
     qtd = supabase.table('relatorios').select('*', count='exact').limit(0).execute()
     qtd = int(qtd.count)
@@ -37,6 +44,30 @@ def qtd_pages():
     for i in range (1, 11):
         if (i * 25) > qtd:
             return i
+
+def data_for_copy_report(ufv):
+    try:
+        cams = supabase.table('cameras').select('nome', 'status').eq('usina', ufv).order('id', desc=True).execute()
+        return cams.data
+    except Exception as e:
+        print(e)
+
+def data_for_copy_reports():
+    try:
+        cams = supabase.table('cameras').select('nome', 'status', 'usina').order('usina', desc=False).execute()
+        return cams.data
+    except Exception as e:
+        print(e)
+
+def data_for_copy_report_specific(ufvs_list):
+    try:
+        cams = supabase.table('cameras').select('nome', 'status', 'usina').in_('usina', ufvs_list).order('usina', desc=False).execute()
+        return cams.data
+    except Exception as e:
+        print(e)
+
+def switch_status_ufv(ufv, status):
+    supabase.table('usinas').update({'online':status}).eq('nome', ufv).execute()
 
 # Busca por relatório aberto em nome do usuário
 def show_open_report(user_id):
@@ -61,7 +92,7 @@ def show_all_open_reports():
 # Busca todos os registros de um relatório, em um local específico
 def show_record(id_report, local_name):
     try:
-        records = supabase.table('registros_elipse').select('*').eq('ref', id_report).eq('local', local_name).order('id', desc=False).execute()
+        records = supabase.table('registros_elipse').select('*').eq('id_relatorio', id_report).eq('local', local_name).order('id', desc=False).execute()
         return records.data
     except Exception as e:
         flash(f'Erro ao buscar no banco de dados: {str(e)}')
@@ -161,30 +192,103 @@ def show_report_page(page):
         flash(f'Erro ao buscar relatórios: {str(e)}')
         print(f'Erro ao buscar relatórios: {str(e)}')
 
-
-
-
-# Cria um relatório aberto para associado ao usuário
-def create_report(user):
+# Busca logs
+def show_logs():
     try:
+        logs = supabase.table('logs').select('*').order('id', desc=True).execute()
+        return logs.data
+    except Exception as e:
+        pass
+
+# Bususca todas ufvs
+def show_all_ufvs():
+    ufvs = supabase.table('usinas').select('nome', 'empresa').execute()
+    return ufvs.data
+
+# Busca status de usina
+def show_status_ufv(ufv):
+    status = supabase.table('usinas').select('online').eq('nome', ufv).execute()
+    return status.data[0]
+
+# Cria um relatório aberto associado ao usuário
+def create_report(user, user_name):
+    try:
+        # Insere registro com informações do formulário
         data_atual = datetime.now()
         data_atual = data_atual.strftime('%d/%m/%Y')
         hora_atual = datetime.now().hour
+        minuto_atual = datetime.now().minute
         turno = 'noturno' if hora_atual in [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6] else 'diurno'
-        supabase.table('relatorios').insert({'dia':data_atual, 'responsavel':user, 'status':'TRUE', 'turno':turno}, ).execute()
+        supabase.table('relatorios').insert({'dia':data_atual, 'responsavel':user, 'status':'TRUE', 'turno':turno}).execute()
+        supabase.table('logs').insert({
+            'data':data_atual, 
+            'horario':f'{hora_atual}:{minuto_atual}',
+            'acao':f'Criação de novo relatório',
+            'usuario':user_name}).execute()
     except Exception as e:
         flash(f'Erro ao criar relatório: {str(e)}')
 
 # Cria um registro no relatório de determinada UFV
 def create_record_elipse(id_report, time, place, status, obs):
     try:
+        # Cria registro com dados do formulário
         supabase.table('registros_elipse').insert({
             'local':place,
             'horario':time,
             'status':status,
             'observacao':obs,
-            'ref':id_report
+            'id_relatorio':id_report,
+            'referencia':'Usina'
         }).execute()
+
+        # Insere registro com informações das câmeras
+        cams = supabase.table('cameras').select('nome', 'status').eq('usina', place).order('id', desc=False).execute()
+        cams = cams.data
+
+        online = 0
+        cams_off = []
+
+        for cam in cams:
+            if cam['status'] == 'online': 
+                online += 1
+            else:
+                cams_off.append(cam['nome'])
+
+
+        if len(cams) == online:
+            supabase.table('registros_elipse').insert({
+                'local':place,
+                'horario':time,
+                'status':'Ok',
+                'observacao':'',
+                'id_relatorio':id_report,
+                'referencia':'Câmeras'
+            }).execute()
+        elif online != 0 and len(cams) > online:
+
+            text_cams = 'Câmeras Offline: '
+            text_list_off = ', '.join(cams_off)
+            text_cams += text_list_off
+
+            supabase.table('registros_elipse').insert({
+                'local':place,
+                'horario':time,
+                'status':f'{online}/{len(cams)}',
+                'observacao':text_cams,
+                'id_relatorio':id_report,
+                'referencia':'Câmeras'
+            }).execute()
+        elif online == 0:
+            supabase.table('registros_elipse').insert({
+            'local':place,
+            'horario':time,
+            'status':'Offline',
+            'observacao':'Todas as câmeras estão Offlines',
+            'id_relatorio':id_report,
+            'referencia':'Câmeras'
+        }).execute()
+            
+
     except Exception as e:
         flash(f'Erro ao criar registro: {str(e)}')
     
@@ -197,7 +301,7 @@ def status_report(id):
         flash(f'Erro ao buscar status do relatório: {str(e)}')
 
 # Adiciona nova câmera a usina
-def add_cam(ufv, nome, tipo, obs, status):
+def add_cam(ufv, nome, tipo, obs, status, user):
     try:
         supabase.table('cameras').insert({
             'usina':ufv,
@@ -206,16 +310,38 @@ def add_cam(ufv, nome, tipo, obs, status):
             'observacao':obs,
             'status':status
         }).execute()
+
+        # Configuração de log
+        data_atual = datetime.now()
+        data_atual = data_atual.strftime('%d/%m/%Y')
+        hora_atual = datetime.now().hour
+        minuto_atual = datetime.now().minute
+        supabase.table('logs').insert({
+            'data':data_atual, 
+            'horario':f'{hora_atual}:{minuto_atual}',
+            'acao':f'Criação de nova câmera, com nome {nome}, do tipo {tipo}, na usina {ufv}',
+            'usuario':user}).execute()
     except Exception as e:
         flash(f'Erro ao adicionar nova câmera: {str(e)}')
 
 # Adiciona UFV
-def add_ufv(nome, empresa):
+def add_ufv(nome, empresa, user):
     try:
         supabase.table('usinas').insert({
             'nome':nome,
             'empresa':empresa
         }).execute()
+
+        # Configuração de log
+        data_atual = datetime.now()
+        data_atual = data_atual.strftime('%d/%m/%Y')
+        hora_atual = datetime.now().hour
+        minuto_atual = datetime.now().minute
+        supabase.table('logs').insert({
+            'data':data_atual, 
+            'horario':f'{hora_atual}:{minuto_atual}',
+            'acao':f'Criação de nova UFV, com nome {nome}, da empresa {empresa}',
+            'usuario':user}).execute()
     except Exception as e:
         flash(f'Erro ao adicionar nova UFV: {str(e)}')
 

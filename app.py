@@ -1,4 +1,5 @@
 import bcrypt
+import json
 from flask import *
 from forms import *
 from roles import *
@@ -7,6 +8,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 import database as db
 import os
+import pyperclip
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
@@ -44,7 +46,7 @@ def home():
         report['responsavel'] = db.search_name_user(report['responsavel'])
 
     if form.validate_on_submit():
-        db.create_report(current_user.id)
+        db.create_report(current_user.id, current_user.nome)
         flash('Login bem sucedido!', 'success')
         return redirect(url_for('home'))
     
@@ -79,7 +81,8 @@ def relatorio(id_relatorio, empresa, ufv):
     cams = db.show_cams(ufv)
     cams_closed_report = db.show_cams_closed_report(id_relatorio)[0]['dados'] if not status else []
     occurrences_report = db.show_occurrences_report(id_relatorio)
-    reports.sort(key=lambda x: x["id"])
+    all_ufvs = db.show_all_ufvs()
+    status_ufv = db.show_status_ufv(ufv)['online']
 
     form_elipse = CreateRecord()
     form_close_report = CloseReport()
@@ -89,14 +92,20 @@ def relatorio(id_relatorio, empresa, ufv):
     form_add_occurrence = AddOccurrence()
     form_edit_occurrence = EditOccurrence()
     form_delete_occurrence = DeleteOccurrence()
+    form_copy_report_local = CopyReportLocal()
+    form_no_connect_ufv = NoConnectUFV()
 
-    empresas = {
-        'Athon': ['Brasilia 100', 'Brasilia 200', 'Morro Agudo 100', 'Tres Lagoas 100', 'Buritizeiro 100', 'Bela Vista de Goias 100', 'Santa Rita 100'],
-        'Mirai': ['Ouvidor IV'],
-        'Aevo': ['Xuri', 'Araguari', 'Planuria']
-    }
+    empresas = {}
 
-    
+    for usina in all_ufvs:
+        nome_empresa = usina['empresa']
+        nome_usina = usina['nome']
+
+        if nome_empresa not in empresas:
+            empresas[nome_empresa] = []
+
+        if nome_usina not in empresas[nome_empresa]:
+            empresas[nome_empresa].append(nome_usina)
 
     if form_elipse.validate_on_submit() and form_elipse.submit_create_report.data:
         horario = form_elipse.time.data
@@ -113,11 +122,15 @@ def relatorio(id_relatorio, empresa, ufv):
         db.edit_record_elipse(id_record, horario, ufv, status, obs)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
     
-    elif form_close_report.validate_on_submit() and  form_close_report.submit_close_report.data:
+    elif form_close_report.validate_on_submit() and form_close_report.submit_close_report.data:
         db.close_report(str(id_relatorio))
         db.close_cams_report(empresas, id_relatorio)
         return redirect(url_for('home'))
     
+    elif form_no_connect_ufv.submit_no_connect_ufv and form_no_connect_ufv.submit_no_connect_ufv.data:
+        db.switch_status_ufv(ufv, not status_ufv)
+        return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+        
     elif form_delete_record.validate_on_submit() and form_delete_record.submit_delete_record.data:
         db.delete_record_elipse(form_delete_record.id_recordDeleteElipse.data)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
@@ -152,8 +165,34 @@ def relatorio(id_relatorio, empresa, ufv):
         id_delete_occurence = form_delete_occurrence.id_delete_occurrence.data
         db.delete_occurrence(id_delete_occurence)
         return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+    
+    elif form_copy_report_local.submit_copy_report_local.data and form_copy_report_local.validate_on_submit():
+        mensagemTitulo = '*RELATÓRIO DE CÂMERAS*\n\n'
+        mensagemStatus = ''
+        mensagemCameras = ''
+        mensagem = ''
+        onlines = 0
+        cameras = db.data_for_copy_report(ufv)
+        
+        for camera in cameras: 
+            if camera['status'] == 'online': onlines += 1
+            mensagemCameras += f'\n- *{camera["nome"]}:* {camera["status"].capitalize()}'
+
+        if len(cameras) == onlines: mensagemStatus = f'🟢 *{ufv}*'
+        elif onlines > 0 and len(cameras) > onlines: mensagemStatus = f'🟡 *{ufv} - {onlines}/{len(cameras)}*'
+        elif onlines == 0: mensagemStatus = f'🔴 *{ufv} - Offline*'
+
+        mensagem += mensagemTitulo
+        mensagem += mensagemStatus
+        mensagem += mensagemCameras
 
 
+
+        pyperclip.copy(mensagem)
+        return redirect(url_for('relatorio', id_relatorio = id_relatorio, empresa = empresa, ufv=ufv))
+
+
+    print(status)
     return render_template('relatorio_aberto.html', 
                            reports = reports, 
                            form_elipse = form_elipse, 
@@ -165,6 +204,7 @@ def relatorio(id_relatorio, empresa, ufv):
                            form_edit_record = form_edit_record, 
                            form_delete_record = form_delete_record,
                            form_edit_cam_record = form_edit_cam_record,
+                           form_no_connect_ufv = form_no_connect_ufv,
                            status = status,
                            cams = cams,
                            cams_closed_report = cams_closed_report,
@@ -172,7 +212,9 @@ def relatorio(id_relatorio, empresa, ufv):
                            form_add_occurrence = form_add_occurrence,
                            form_edit_occurrence = form_edit_occurrence,
                            form_delete_occurrence = form_delete_occurrence,
-                           occurrences_report = occurrences_report) 
+                           form_copy_report_local = form_copy_report_local,
+                           occurrences_report = occurrences_report,
+                           status_ufv = status_ufv) 
 
 @app.route('/relatorios/<int:page>', methods=['GET', 'POST'])
 @login_required
@@ -207,7 +249,7 @@ def usina(ufv):
         tipo = form_add_cam.tipo.data
         obs = form_add_cam.obs.data
         status = form_add_cam.status.data
-        db.add_cam(ufv, nome, tipo, obs, status)
+        db.add_cam(ufv, nome, tipo, obs, status, current_user.nome)
         return redirect(url_for('usina', ufv = ufv))
 
     if form_edit_cam.validate_on_submit() and form_edit_cam.submit_edit_cam.data:
@@ -279,7 +321,7 @@ def empresa(empresa):
 
     if form_add_ufv.validate_on_submit():
         nome = form_add_ufv.name_add_ufv.data
-        db.add_ufv(nome, empresa)
+        db.add_ufv(nome, empresa, current_user.nome)
         return redirect(url_for('empresa', empresa = empresa))
 
     return render_template('empresa.html', empresa = empresa, form_add_ufv = form_add_ufv, ufvs = ufvs)
@@ -419,6 +461,99 @@ def ocorrencias():
         return redirect(url_for('ocorrencias'))
     
     return render_template('ocorrencias.html')
+
+@app.route('/logs')
+@login_required
+@role_required('adm')
+def logs():
+
+    log = db.show_logs()
+
+    return render_template('logs.html', logs = log)
+
+@app.route('/copiar_relatorios', methods=['GET', 'POST'])
+@csrf.exempt
+def copiar_relatorios():
+
+    ufvs_empresas = db.show_all_ufvs()
+    dic_cams = {}
+
+    for usina in ufvs_empresas:
+        empresa = usina['empresa']
+        nome_usina = usina['nome']
+
+        if empresa not in dic_cams:
+            dic_cams[empresa] = {}
+
+        if nome_usina not in dic_cams[empresa]:
+            dic_cams[empresa][nome_usina] = []
+    
+    mensagem = 'RELATÓRIO DE MONITORAMENTO\n'
+
+    report_type = request.form.get('select-relatorio')
+    ufvs = request.form.getlist('optionUFV')
+    submit = request.form.get('submit')
+    path = request.args.get("path")
+    cams = None
+
+    if report_type == 'all': cams = db.data_for_copy_reports()
+    elif report_type == 'specific': cams =  db.data_for_copy_report_specific(ufvs)
+
+    # Separa câmeras por usina
+    for cam in cams:
+        for empresa in dic_cams:
+            if cam['usina'] in dic_cams[empresa]:
+                dic_cams[empresa][cam['usina']].append({
+                    'nome':cam['nome'],
+                    'status':cam['status']
+                })
+                break
+
+    print(dic_cams)
+
+    # Ordena cameras de usina e ordem alfabética
+    for empresa in dic_cams:
+        for ufv in dic_cams[empresa]:
+            dic_cams[empresa][ufv] = sorted(dic_cams[empresa][ufv], key=lambda x: x["nome"])
+
+    for empresa in dic_cams:
+        for usina in dic_cams[empresa]:
+            onlines = 0
+            mensagemTituloUsina = ''
+            mensagemCamerasUsina = ''
+
+            for cam in dic_cams[empresa][usina]:
+                if cam['status'] == 'online': onlines += 1
+                mensagemCamerasUsina += f'- *{cam["nome"]}:* {cam["status"].title()}\n'
+
+            if len(dic_cams[empresa][usina]) == 0: continue
+            elif len(dic_cams[empresa][usina]) == onlines and len(dic_cams[empresa][usina]) != 0: 
+                mensagemTituloUsina = f'🟢 *{usina}*'
+            elif onlines > 0 and len(dic_cams[empresa][usina]) > onlines: 
+                mensagemTituloUsina = f'🟡 *{usina} - {onlines}/{len(dic_cams[empresa][usina])}*'
+            elif onlines == 0: 
+                mensagemTituloUsina = f'🔴 *{usina} - Offline*'
+
+            mensagem += '\n' + mensagemTituloUsina
+            if submit == 'completo': mensagem += '\n' + mensagemCamerasUsina + '\n'
+
+    
+    return jsonify({'mensagem':mensagem, 'redirect_to': path})
+        
+@app.route('/usinas_copia', methods=['GET', 'POST'])
+@csrf.exempt
+def usinas_copia():
+    ufvs = db.search_ufvs()
+    ufvs_in_company = {}
+
+    for ufv in ufvs:
+        if ufv['empresa'] not in ufvs_in_company:
+            ufvs_in_company[ufv['empresa']] = [ufv['nome']]
+        else:
+            ufvs_in_company[ufv['empresa']].append(ufv['nome'])
+
+    return jsonify(ufvs_in_company)
+
 
 
 @app.route('/logout')

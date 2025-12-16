@@ -6,7 +6,7 @@ class CreateReport(FlaskForm):
     submit = SubmitField('Abrir')
 
 class CreateRecord(FlaskForm):
-    time = StringField('horario', render_kw={'class':'form-control', 'readonly':True})
+    time = StringField('horario', render_kw={'class':'form-control'})
     status = SelectField('status', choices=[
         ('Ok', 'Ok'),
         ('Sem conexão', 'Sem conexão'),
@@ -19,7 +19,10 @@ class CreateRecord(FlaskForm):
     submit_create_report = SubmitField('Criar', render_kw={'class':'btn btn-primary'})
 
 class CloseReport(FlaskForm):
-    submit_close_report = SubmitField('Fechar Relatório', render_kw={'class':'btn btn-outline-dark'})
+    submit_close_report = SubmitField()
+
+class NoConnectUFV(FlaskForm):
+    submit_no_connect_ufv = SubmitField('Enviar')
 
 class EditRecord(FlaskForm):
     timeEditElipse = StringField('horario', render_kw={'class':'form-control', 'readonly':True})
@@ -209,3 +212,9 @@ class EditOccurrence(FlaskForm):
 class DeleteOccurrence(FlaskForm):
     id_delete_occurrence = StringField()
     submit_delete_occurrence = SubmitField('Excluir')
+
+class CopyReportLocal(FlaskForm):
+    submit_copy_report_local = SubmitField('Copiar') 
+
+class CopyReportGeral(FlaskForm):
+    submit_copy_report_geral = SubmitField('Copiar') 

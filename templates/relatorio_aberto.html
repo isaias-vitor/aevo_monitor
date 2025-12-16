@@ -24,7 +24,6 @@
                         <select id="empresas-select" class="form-select">
                             <option value="Athon">Athon</option>
                             <option value="Mirai">Mirai</option>
-                            <option value="Aevo">Aevo</option>
                         </select>
                     {% endif %}    
                 </div>
@@ -43,11 +42,41 @@
                     </select>
                 </div>
                 {% if status %}
-                    <div class="col-2">
+                    <div class="col-2 d-flex justify-content-end pe-4">
+
+                        <div>
+                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Multi-Registro">
+                                <i class='bxr bx-checks'></i> 
+                            </button>
+                        </div>
+
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Ir para UFV">
+                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-status">
+                                <i class='bx  bx-solar-panel'></i> 
+                            </button>
+                        </div>
+
+                        {%if status_ufv%}
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Usina Offline">
+                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-status">
+                                <i class='bx bx-signal-slash'></i> 
+                            </button>
+                        </div>
+                        {%else%}
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Usina Offline">
+                            <button class="btn btn-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-status">
+                                <i class='bx bx-signal-slash'></i> 
+                            </button>
+                        </div>
+                        {%endif%}
+
+
                         {% if id_responsible == current_user.id %}
                             <form id="form-closeReport" method="post">
                                 {{form_close_report.hidden_tag()}}
-                                {{form_close_report.submit_close_report()}}
+                                <button type="submit" class="btn btn-outline-dark d-flex rounded-circle p-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Fechar Relatório" name="{{form_close_report.submit_close_report.name}}">
+                                    <i class='bxr bx-x'></i> 
+                                </button>
                             </form>
                         {% endif %} 
                     </div>
@@ -58,7 +87,7 @@
         <div id="relatorios" class="container row p-0">
             <div class="col col-9">
                 <div class="d-flex justify-content-between mb-3">
-                    <h4>Funcionamento da Usina</h4>
+                    <h4>Registros</h4>
                     {% if status and current_user.level == 'monitor'%}
                         <button class="btn btn-light d-flex rounded-circle mb-1 p-2" onclick="modalElipse(this)">
                             <i class='bxr bx-plus'></i> 
@@ -71,6 +100,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="text-center">Horário</th>
+                                <th scope="col" class="text-center">Referência</th>
                                 <th scope="col" class="text-center">Status</th>
                                 <th scope="col" class="text-center">Observação</th>
                                 <th></th>
@@ -80,10 +110,11 @@
                             {% for report in reports %}
                                 <tr class="
                                     {% if report.status == 'Ok': %} ok 
-                                    {% elif report.status == 'Sem conexão': %} sem-conexao
+                                    {% elif report.status == 'Sem conexão' or report.status[0] != '0': %} sem-conexao
                                     {% else: %} ocorrencia {% endif %}
                                 " id="{{report.id}}">
                                     <td scope="row" class="text-center">{{report.horario}}</td>
+                                    <td class="text-center">{{report.referencia}}</td>
                                     <td class="text-center">{{report.status}}</td>
                                     <td class="text-center">
                                     {% if report.observacao != '' %} {{ report.observacao }}
@@ -91,12 +122,16 @@
                                     {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-link btn-edit rounded-circle btn-sm text-warning p-1" onclick="modalElipse(this)">
-                                            <i class='bxr bxs-edit-alt text-secondary' style="font-size:1.5rem"></i> 
-                                        </button>
-                                        <button class="btn btn-link btn-delete rounded-circle btn-sm text-danger p-1" onclick="modalDeleteElipse(this)">
-                                            <i class='bxr bxs-trash-x text-secondary' style="font-size:1.5rem"></i> 
-                                        </button>
+                                        {% if status %}
+                                            {% if report.referencia == 'Usina' %}
+                                                <button class="btn btn-link btn-edit rounded-circle btn-sm text-warning p-1" onclick="modalElipse(this)">
+                                                    <i class='bxr bxs-edit-alt text-secondary' style="font-size:1.5rem"></i> 
+                                                </button>
+                                            {% endif %}
+                                            <button class="btn btn-link btn-delete rounded-circle btn-sm text-danger p-1" onclick="modalDeleteElipse(this)">
+                                                <i class='bxr bxs-trash-x text-secondary' style="font-size:1.5rem"></i> 
+                                            </button>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -107,6 +142,14 @@
             <div class="col col-3">
                 <div class="d-flex justify-content-between mb-3">
                     <h4>Câmeras</h4>
+                    {% if status %}
+                        <form method="post" id="form-copyCamReport">
+                            {{form_copy_report_local.hidden_tag() }}
+                            <button class="btn btn-light d-flex rounded-circle mb-1 p-2" name="{{form_copy_report_local.submit_copy_report_local.name}}" value="1">
+                                <i class='bxr bxs-copy-list'></i> 
+                            </button>
+                        </form>
+                    {% endif %}
                 </div>
                 <div class="cardUsina rounded-3 bg-white border p-2">
                     <table id="tabela-cameras" class="table table-hover table-borderless text-center table-sm">
@@ -174,10 +217,10 @@
                                 {% if occurrence.usina == ufv_aberto %}
                                     <tr data-id="{{occurrence.id}}" data-data="{{occurrence.data}}" data-horario="{{occurrence.horario}}" data-status="{{occurrence.status}}" data-acoes="{{occurrence.acoes}}" data-obs="{{occurrence.observacoes}}" class="cursor-pointer">
                                         <th scope="row" class="text-center">{{occurrence.id}}</th>
-                                        <td class="text-center">{{occurrence.data}}</td>
+                                        <td class="text-center d-flex align-items-center">{{occurrence.data}}</td>
                                         <td class="text-center">{{occurrence.horario}}</td>
                                         <td class="text-center text-capitalize">{{occurrence.status}}</td>
-                                        <td> {{occurrence.acoes}} </td>
+                                        <td class="text-center"> {{occurrence.acoes}} </td>
                                         <td> {{occurrence.observacoes}} </td>
                                     </tr>
                                 {% endif %}
@@ -305,6 +348,28 @@
                         {{ form_edit_cam_record.submit_edit_cam_record(class='btn btn-primary') }}
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-status" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="titulo-modalCamera" class="modal-title fs-5">Alterar status de usina</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    Deseja realmente mudar o status da usina?
+                </div>
+                <div class="modal-footer">
+                   <form id="form-editCamera" method="post">
+                        {{ form_no_connect_ufv.hidden_tag() }}
+                    
+                        {{ form_no_connect_ufv.submit_no_connect_ufv(class='btn btn-primary') }}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -461,6 +526,8 @@
         
         const empresaSelect = document.getElementById('empresas-select');
         const usinaSelect = document.getElementById('ufv-select');
+
+        console.log(optionsEmpresas)
         
         empresaSelect.value = empresa;
         usinaSelect.innerHTML = '';
@@ -569,8 +636,6 @@
             const hora = agora.getHours().toString().padStart(2, '0');
             const minutos = agora.getMinutes().toString().padStart(2, '0');
 
-            alert(`${hora}:${minutos}`)
-
             document.getElementById("date_add_occurrence").value = agora.toISOString().split('T')[0];
             document.getElementById("hour_add_occurrence").value = `${hora}:${minutos}`
             document.getElementById("status_add_occurrence").option = 'Religamento';
@@ -604,7 +669,9 @@
         </script>
     {% endif %}
 
-    <script>
-        
-    </script>
+<script>
+    // Inicializa todos os tooltips da página
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+</script>
 {% endblock %}
