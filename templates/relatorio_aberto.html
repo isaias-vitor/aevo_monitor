@@ -41,25 +41,25 @@
                         <option value="Tres Lagoas">Tres Lagoas 100</option>
                     </select>
                 </div>
-                {% if status %}
+                {% if status and id_responsible == current_user.id %}
                     <div class="col-2 d-flex justify-content-end pe-4">
 
-                        <div>
-                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Multi-Registro">
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Multi-Registro">
+                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-multi">
                                 <i class='bxr bx-checks'></i> 
                             </button>
                         </div>
 
-                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Ir para UFV">
-                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-status">
+                        <a href="{{url_for('usina', ufv=ufv_aberto)}}" data-bs-toggle="tooltip" data-bs-placement="top" title="Ir para UFV">
+                            <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2">
                                 <i class='bx  bx-solar-panel'></i> 
                             </button>
-                        </div>
+                        </a>
 
                         {%if status_ufv%}
-                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Usina Offline">
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Usina Online">
                             <button class="btn btn-outline-dark d-flex rounded-circle p-2 me-2" data-bs-toggle="modal" data-bs-target="#modal-status">
-                                <i class='bx bx-signal-slash'></i> 
+                                <i class='bx bx-signal-5'></i> 
                             </button>
                         </div>
                         {%else%}
@@ -69,16 +69,14 @@
                             </button>
                         </div>
                         {%endif%}
+                        
+                        <div data-bs-toggle="tooltip" data-bs-placement="top" title="Fechar Relatório">
+                            {{form_close_report.hidden_tag()}}
+                            <button type="submit" class="btn btn-outline-dark d-flex rounded-circle p-2" data-bs-toggle="modal" data-bs-target="#modal-close-report">
+                                <i class='bxr bx-x'></i> 
+                            </button>
+                        </div>
 
-
-                        {% if id_responsible == current_user.id %}
-                            <form id="form-closeReport" method="post">
-                                {{form_close_report.hidden_tag()}}
-                                <button type="submit" class="btn btn-outline-dark d-flex rounded-circle p-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Fechar Relatório" name="{{form_close_report.submit_close_report.name}}">
-                                    <i class='bxr bx-x'></i> 
-                                </button>
-                            </form>
-                        {% endif %} 
                     </div>
                 {% endif %}
             </div>
@@ -300,6 +298,39 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-multi" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalElipse" class="modal-title fs-5">Multi Registros</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" id="lista-multi">
+                    {% for empresa in empresas %}
+                        {% for usina in empresas[empresa] %}
+                            <div class="d-flex justify-content-between py-1">
+                                <div class="col-8">{{usina}}</div>
+                                <select class="form-select form-select-sm" id="{{usina}}">
+                                    <option value="Ok" selected>Ok</option>
+                                    <option value="Sem conexão">Sem conexão</option>
+                                    <option value="Religamento">Religamento</option>
+                                    <option value="Incêndio">Incêndio</option>
+                                    <option value="Furto">Furto</option>
+                                    <option value="Invasão">Invasão</option>
+                                  </select>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="truco()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modal-delete-elipse" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -490,6 +521,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-close-report" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="tituloModalOcorrenciaDelete" class="modal-title fs-5">Fechar Relatório</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form-deleteRecord" method="post">
+                    {{ form_close_report.hidden_tag() }}
+                    <div class="modal-body text-center">
+                        Tem certeza que deseja fechar este relatório? Após a confirmação, apenas um admnistrador poderá reabri-lo.
+                    </div>
+                    
+                    <div class="modal-footer">
+                        {{ form_close_report.submit_close_report(class='btn btn-danger')}}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Impede que usuario ultilize URL para acessar outras usinas -->
     {% if current_user.level == 'gestor' %}
         <script>
@@ -504,6 +557,42 @@
       
     <script>
         document.getElementById('icon-relatorios').classList.add('bg-body-secondary')
+
+        function truco(){
+
+            var selects = document.querySelectorAll('#lista-multi select')
+            var multiUfvs = {}
+            var dados = {}
+
+            selects.forEach(ufv => {
+                multiUfvs[ufv.id] = ufv.value    
+            });
+
+            dados['multiUfvs'] = multiUfvs
+            dados['id_report'] = '{{id_relatorio }}'
+
+            const agora = new Date();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const horario = `${horas}:${minutos}`;
+
+            dados['hora'] = horario
+
+            fetch('/salvar_multi_relatorios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(err => {
+                console.error(err);
+            });
+        }
     </script>  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
@@ -519,7 +608,9 @@
         }
     </script>
 
-    <script>        
+    <script> 
+
+
         const optionsEmpresas = {{ empresas | tojson }};
 
         const empresa = `{{empresa}}`
@@ -646,7 +737,7 @@
             modal.show();
         }
 
-    </script>
+    </>
 
     {% if status %}
         <script>

@@ -3,6 +3,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from datetime import datetime
 from flask import flash
+from flask_login import current_user
 
 load_dotenv()
 
@@ -11,14 +12,32 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Data e Hora atuais
+def data_hora_atual():
+    data_atual = datetime.now()
+    data_atual = data_atual.strftime('%d/%m/%Y')
+    hora_atual = datetime.now().hour
+    minuto_atual = datetime.now().minute
+    return {
+        'data':data_atual,
+        'hora':hora_atual,
+        'minuto':minuto_atual
+    }
+
+# Verficação de usuario
 def search_login(user):
     try:
         verification = supabase.table('usuarios').select('*').eq('email', user).execute()
         print(verification.data)
-        return verification.data[0] if verification.data else False
+        if verification.data:
+            USER = verification.data[0]['nome']
+            return verification.data[0]
+        else: 
+            return False
     except Exception as e:
         flash(f'Erro ao acessar o banco de dados: {str(e)}', 'danger')
 
+# Verfica se o usuario com determinado id existe
 def search_id_login(id):
     try:
         search = supabase.table('usuarios').select('*').eq('id', id).execute()
@@ -26,10 +45,12 @@ def search_id_login(id):
     except:
         flash('Usuário não encontrado no banco de dados')
 
+# Retorna o nome do usuario a partir do seu id
 def search_name_user(id_user):
     names = supabase.table('usuarios').select('nome').eq('id', id_user).execute()
     return names.data[0]['nome']
 
+# Retorna todas as UFVs com suas determindas empresas
 def search_ufvs():
     try:
         ufvs = supabase.table('usinas').select('nome', 'empresa').execute()
@@ -37,6 +58,7 @@ def search_ufvs():
     except Exception as e:
         print(e)
 
+# Retorna quantidade de páginas de acordo com a quantidade de relatorios (Paginação)
 def qtd_pages():
     qtd = supabase.table('relatorios').select('*', count='exact').limit(0).execute()
     qtd = int(qtd.count)
@@ -45,6 +67,7 @@ def qtd_pages():
         if (i * 25) > qtd:
             return i
 
+# Retorna dados necessários para a cópia de relatorio de uma UFV
 def data_for_copy_report(ufv):
     try:
         cams = supabase.table('cameras').select('nome', 'status').eq('usina', ufv).order('id', desc=True).execute()
@@ -52,6 +75,7 @@ def data_for_copy_report(ufv):
     except Exception as e:
         print(e)
 
+# Retorna dados necessários para a cópia de todas UFVs
 def data_for_copy_reports():
     try:
         cams = supabase.table('cameras').select('nome', 'status', 'usina').order('usina', desc=False).execute()
@@ -59,6 +83,7 @@ def data_for_copy_reports():
     except Exception as e:
         print(e)
 
+# Retorna dados necessários para a cópia de algumas UFVs
 def data_for_copy_report_specific(ufvs_list):
     try:
         cams = supabase.table('cameras').select('nome', 'status', 'usina').in_('usina', ufvs_list).order('usina', desc=False).execute()
@@ -66,8 +91,15 @@ def data_for_copy_report_specific(ufvs_list):
     except Exception as e:
         print(e)
 
+# Troca o status de uma comum
 def switch_status_ufv(ufv, status):
     supabase.table('usinas').update({'online':status}).eq('nome', ufv).execute()
+    data_hora = data_hora_atual()
+    supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Alteração de status da usina {ufv}',
+            'usuario':current_user.nome}).execute()
 
 # Busca por relatório aberto em nome do usuário
 def show_open_report(user_id):
@@ -210,6 +242,8 @@ def show_status_ufv(ufv):
     status = supabase.table('usinas').select('online').eq('nome', ufv).execute()
     return status.data[0]
 
+
+
 # Cria um relatório aberto associado ao usuário
 def create_report(user, user_name):
     try:
@@ -292,7 +326,7 @@ def create_record_elipse(id_report, time, place, status, obs):
     except Exception as e:
         flash(f'Erro ao criar registro: {str(e)}')
     
-# Retorna o status do relatório (Aberto oU Fechado)
+# Retorna o status do relatório (Aberto ou Fechado)
 def status_report(id):
     try:
         status = supabase.table('relatorios').select('status').eq('id', id).execute()
@@ -354,6 +388,18 @@ def add_contact_ufv(ufv, nome, empresa, telefone):
             'empresa':empresa,
             'telefone':telefone
         }).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+                'data':data_hora['data'], 
+                'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+                'acao':f'Alteração de status da usina {ufv}',
+                'usuario':current_user.nome}).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Adição de novo contato na usina {ufv}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao inserir informações de contato no banco de dados: {str(e)}')
 
@@ -367,6 +413,12 @@ def add_password(software, usuario, senha, descricao, observacao):
             'descricao':descricao,
             'observacao':observacao
         }).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Adição de nova credencial no banco de credenciais',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao inserir crendenciais no banco de dados: {str(e)}')
 
@@ -380,6 +432,12 @@ def add_user(nome, email, senha, nivel, empresa):
             'nivel':nivel,
             'empresa':empresa
         }).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Adição de novo usuário',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f'Erro ao inserir usuário no banco de dados: {str(e)}')
 
@@ -403,6 +461,12 @@ def add_occurrence(horario, status, acoes, observacoes, id_relatorio, empresa, u
             'data':data,
             'responsavel':responsavel
         }).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Adição de nova ocorrência',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f'Erro ao editar ocorrencia: {e}')
         flash(f'Erro ao editar ocorrencia! {e}')
@@ -418,6 +482,12 @@ def edit_record_elipse(id_report, time, place, status, obs):
             'status':status,
             'observacao':obs
         }).eq('id', id_report).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de registro de id {id_report}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar registro: {str(e)}')
 
@@ -429,7 +499,13 @@ def edit_cam(id_cam, nome, tipo, status, obs):
             'tipo':tipo,
             'status':status,
             'observacao':obs
-        }).eq('id', id_cam).execute()    
+        }).eq('id', id_cam).execute()  
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de câmera id {id_cam}',
+            'usuario':current_user.nome}).execute()  
     except Exception as e:
         flash(f'Erro ao editar câmera: {str(e)}')    
 
@@ -440,6 +516,12 @@ def edit_local_ufv(ufv, endereco, maps):
             'endereco':endereco,
             'geolocalizacao':maps
         }).eq('nome', ufv).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição das informações da localização da usina {ufv}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar localização: {str(e)}') 
 
@@ -452,6 +534,12 @@ def edit_contact_ufv(id_edit_contact, ufv, nome, empresa, telefone):
             'empresa':empresa,
             'telefone':telefone
         }).eq('id', id_edit_contact).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de contato "{nome}" da usina {ufv}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar contato: {str(e)}')
 
@@ -465,6 +553,12 @@ def edit_credential(id_credentials, software, usuario, senha, descricao, observa
             'descricao':descricao,
             'observacao':observacao
         }).eq('id', id_credentials).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de credencial do software {software}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar credencial: {str(e)}')
 
@@ -474,6 +568,12 @@ def edit_cam_report(id_cam, status, obs):
         supabase.table('cameras').update({
             'status':status,
             'observacao':obs}).eq('id', id_cam).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de status/observação de câmera de id {id_cam}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar câmera: {str(e)}')
 
@@ -486,14 +586,25 @@ def edit_user(id_user, nome, email, nivel, empresa):
             'nivel':nivel,
             'empresa':empresa
         }).eq('id', id_user).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de dados do usuário {nome}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao editar usuário: {str(e)}')
 
 # Edita senha do usuário
 def edit_new_password(id_user, senha):
-    print(senha)
     try:
         supabase.table('usuarios').update({'senha': senha}).eq('id', id_user).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de senha do usuário {search_name_user(id_user)}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f'Erro ao alterar senha: {str(e)}')
 
@@ -514,6 +625,12 @@ def edit_occurrence(id_ocorrencia, data, horario, status, acoes, observacoes):
             'acoes':acoes, 
             'observacoes':observacoes,
         }).eq('id', id_ocorrencia).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Edição de ocorrêcia do usuario ID {id_ocorrencia}',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f'Erro ao editar ocorrencia: {e}')
         flash(f'Erro ao editar ocorrencia! {e}')
@@ -524,6 +641,12 @@ def edit_occurrence(id_ocorrencia, data, horario, status, acoes, observacoes):
 def delete_record_elipse(id_report):    
     try:
         result = supabase.table('registros_elipse').delete().eq('id', id_report).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de registro',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f"ERRO: {e}")
 
@@ -531,6 +654,12 @@ def delete_record_elipse(id_report):
 def delete_cam(id_cam):
     try:
         supabase.table('cameras').delete().eq('id', id_cam).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de câmera',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao excluir câmera: {str(e)}')
 
@@ -538,6 +667,12 @@ def delete_cam(id_cam):
 def delete_contact_ufv(id_contact):
     try:
         supabase.table('contatos').delete().eq('id', id_contact).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de contato',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao excluir contato: {str(e)}')
 
@@ -545,6 +680,12 @@ def delete_contact_ufv(id_contact):
 def delete_credential(id_credential):
     try:
         supabase.table('senhas').delete().eq('id', id_credential).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de crendenciaç',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao excluir credencial: {str(e)}')
 
@@ -552,6 +693,12 @@ def delete_credential(id_credential):
 def delete_user(id_user):
     try:
         supabase.table('usuarios').delete().eq('id', id_user).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de usuário',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao excluir usuário: {str(e)}')
 
@@ -559,6 +706,12 @@ def delete_user(id_user):
 def delete_occurrence(id_occurrence):
     try:
         supabase.table('ocorrencias').delete().eq('id', id_occurrence).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Exclusão de ocorrência',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         print(f'Erro ao excluir a ocorrência: {str(e)}')
         flash(f'Erro ao excluir a ocorrência: {str(e)}')
@@ -568,6 +721,12 @@ def delete_occurrence(id_occurrence):
 def close_report(id_report):
     try:
         supabase.table('relatorios').update({'status':'FALSE'}).eq('id', id_report).execute()
+        data_hora = data_hora_atual()
+        supabase.table('logs').insert({
+            'data':data_hora['data'], 
+            'horario':f'{data_hora['hora']}:{data_hora['minuto']}',
+            'acao':f'Fechamento de relatório',
+            'usuario':current_user.nome}).execute()
     except Exception as e:
         flash(f'Erro ao fechar relatório: {str(e)}')
 

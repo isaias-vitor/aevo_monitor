@@ -554,6 +554,14 @@ def usinas_copia():
 
     return jsonify(ufvs_in_company)
 
+@app.route('/salvar_multi_relatorios', methods=['GET', 'POST'])
+@csrf.exempt
+def salvar_multi_relatorios():
+    dados = request.get_json()
+    path = request.args.get("path")
+    for ufv, status in dados['multiUfvs'].items():
+        db.create_record_elipse(id_report = dados['id_report'], time = dados['hora'], place = ufv, status = status, obs = '')
+    return jsonify({'status':'ok', 'redirect_to': path})
 
 
 @app.route('/logout')

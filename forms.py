@@ -19,7 +19,7 @@ class CreateRecord(FlaskForm):
     submit_create_report = SubmitField('Criar', render_kw={'class':'btn btn-primary'})
 
 class CloseReport(FlaskForm):
-    submit_close_report = SubmitField()
+    submit_close_report = SubmitField('Fechar')
 
 class NoConnectUFV(FlaskForm):
     submit_no_connect_ufv = SubmitField('Enviar')

@@ -49,7 +49,10 @@
                             </div>
                         </div>
                         <div class="col-8">
-                            <button class="btn btn-secondary col-12">Entrar</button>
+                            <button class="btn btn-secondary col-12" onclick="load()">
+                                <span id="text-btn">Entrar</span>
+                                <span id="spinner" class="spinner-border spinner-border-sm" hidden></span>
+                            </button>
                         </div> 
                     </form>
                 </div>
@@ -59,3 +62,10 @@
 
 </body>
 </html>
+
+<script>
+    function load(){
+        text = document.getElementById('text-btn').hidden = true;
+        spinner = document.getElementById('spinner').hidden = false;
+    }
+</script>
